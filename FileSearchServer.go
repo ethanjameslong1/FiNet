@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/ethanjameslong1/GoCloudProject.git/handlers"
+	"github.com/ethanjameslong1/GoCloudProject.git/handler"
+	"log"
 	"net/http"
 )
 
@@ -11,15 +12,10 @@ func main() {
 
 	http.Handle("/", server)
 	http.HandleFunc("/hello", handler.HelloHandler)
-	http.HandleFunc("/form", handler.FormHandler)
-	//we need a handler package, which will be imported through the github link
-	//Hello handler I think will work with the index.html and the formHandler will deal with the form.html
 
-}
+	fmt.Printf("port running on localhost:8080/\n")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatal(err)
+	}
 
-func handleRoot(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
-	fmt.Fprintf(w, "Hello World")
 }
