@@ -1,22 +1,23 @@
 package main
 
 import (
-	"net/http";
+	""
 	"fmt"
+	"net/http"
 )
 
 func main() {
-	fmt.Println("hello, making server now")
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", handleRoot)
+	server := http.FileServer(http.Dir("../static"))
 
-	fmt.Println("server listening to :8080")
-	http.ListenAndServe(":8080", mux)
-
+	http.Handle("/", server)
+	http.HandleFunc("/hello", handler.HelloHandler)
+	http.HandleFunc("/form", handler.FormHandler)
+	//we need a handler package, which will be imported through the github link
+	//Hello handler I think will work with the index.html and the formHandler will deal with the form.html
 
 }
 
-func handleRoot (
+func handleRoot(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
