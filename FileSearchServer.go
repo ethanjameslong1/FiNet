@@ -8,14 +8,16 @@ import (
 )
 
 func main() {
-	server := http.FileServer(http.Dir("../static"))
 
-	http.Handle("/", server)
-	http.HandleFunc("/hello", handler.HelloHandler)
-	http.HandleFunc("POST /search", handler.SearchHandler)
+	mux := http.NewServeMux()
+
+	// server := http.FileServer(http.Dir("../static"))
+
+	mux.HandleFunc("/", handler.RootHandler)
+	mux.HandleFunc("POST /search", handler.SearchHandler)
 
 	fmt.Printf("port running on localhost:8080/\n")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8080", mux); err != nil {
 		log.Fatal(err)
 	}
 
