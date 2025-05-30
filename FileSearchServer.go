@@ -12,6 +12,7 @@ func main() {
 
 	http.Handle("/", server)
 	http.HandleFunc("/hello", handler.HelloHandler)
+	http.HandleFunc("POST /search", handler.SearchHandler)
 
 	fmt.Printf("port running on localhost:8080/\n")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
