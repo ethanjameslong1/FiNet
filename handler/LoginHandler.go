@@ -1,9 +1,10 @@
+// LoginHandler.go
 package handler
 
 import (
-	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
+	"text/template"
 )
 
 type User struct {
@@ -11,23 +12,48 @@ type User struct {
 	Password string `json:"password"`
 }
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		fmt.Fprintf(w, "ParseForm() err: %v", err)
-		return
-	}
+type PageData struct {
+	Error string
+}
 
-	var person User
-	err := json.NewDecoder(r.Body).Decode(&person)
+func ShowLogin(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("static/login.html")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("Error parsing login template: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
+	err = tmpl.Execute(w, PageData{})
+	if err != nil {
+		log.Printf("Error executing login template: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+}
+
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	var person User
+	if err := r.ParseForm(); err != nil {
+		log.Printf("Error parsing form: %v", err)
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+	person.Name = r.FormValue("username")
+	person.Password = r.FormValue("password")
 	if person.Name == "" || person.Password == "" {
-		http.Error(w, err.Error(), http.StatusNoContent)
+		http.Error(w, "name or password empty", http.StatusNoContent)
 		return
 	}
-
-	fmt.Fprintf(w, "Username is: %v. Password is: %v", person.Name, person.Password)
-
+	tmpl, err := template.ParseFiles("static/showUser.html")
+	if err != nil {
+		log.Printf("Error parsing login template: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	err = tmpl.Execute(w, person)
+	if err != nil {
+		log.Printf("Error executing login template: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 }
