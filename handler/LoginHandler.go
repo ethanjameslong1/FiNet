@@ -2,6 +2,7 @@
 package handler
 
 import (
+	"github.com/ethanjameslong1/GoCloudProject.git/database"
 	"log"
 	"net/http"
 	"text/template"
@@ -14,6 +15,10 @@ type User struct {
 
 type PageData struct {
 	Error string
+}
+
+type Handler struct {
+	DBService *database.Service
 }
 
 func ShowLogin(w http.ResponseWriter, r *http.Request) {
@@ -33,6 +38,7 @@ func ShowLogin(w http.ResponseWriter, r *http.Request) {
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var person User
+	Service := database.NewService(r.Context)
 	if err := r.ParseForm(); err != nil {
 		log.Printf("Error parsing form: %v", err)
 		http.Error(w, "Bad request", http.StatusBadRequest)

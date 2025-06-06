@@ -20,6 +20,8 @@ const (
 	SQL_SELECT_USER_BY_USERNAME = `SELECT id, username, created_at FROM users WHERE username = ?`
 	SQL_SELECT_USER_BY_ID       = `SELECT id, username, created_at FROM users WHERE id = ?`
 	SQL_UPDATE_USER_PASSWORD    = `UPDATE users SET password = ? WHERE username = ?`
+
+	SQL_LOGIN = `SELECT id, username, created_at FROM users WHERE username = ? AND password = ?`
 )
 
 type Service struct {
@@ -34,6 +36,7 @@ type Person struct {
 }
 
 var DriverName string = "mysql" //so I don't forget the Driver i'm using teehee
+var DataSource string = "ethan:040323@tcp(127.0.0.1:3306)/my_go_db"
 
 // creates a Service object pointer with a database connection, requires a driver and datasource location
 func NewService(driverName, dataSourceName string) (*Service, error) {
@@ -89,6 +92,16 @@ func QueryUserByName(ctx context.Context, s *Service, name string) (Person, erro
 			return Person{}, fmt.Errorf("user not found: %w", err)
 		}
 		return Person{}, fmt.Errorf("Error finding User: %w", err)
+	}
+	return person, nil
+}
+
+func LoginQuery(ctx context.Context, s *Service, name string, password string) (Person, error) {
+	person := Person{}
+	row := s.db.QueryRowContext(ctx, SQL_LOGIN, name)
+	err := row.Scan(&person.Id, &person.Username, &person.CreatedAt)
+	if err != nil {
+		return Person{}, fmt.Errorf("Error Logging in: %w", err)
 	}
 	return person, nil
 }
