@@ -21,6 +21,14 @@ type Handler struct {
 	DBService *database.Service
 }
 
+func NewHandler(DBService *database.Service) *Handler {
+	h, err := database.NewService(database.DriverName, database.DataSource)
+	if err != nil {
+
+	}
+
+}
+
 func ShowLogin(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("static/login.html")
 	if err != nil {
