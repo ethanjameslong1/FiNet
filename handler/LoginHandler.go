@@ -2,10 +2,12 @@
 package handler
 
 import (
-	"github.com/ethanjameslong1/GoCloudProject.git/database"
+	"fmt"
 	"log"
 	"net/http"
 	"text/template"
+
+	"github.com/ethanjameslong1/GoCloudProject.git/database"
 )
 
 type User struct {
@@ -21,15 +23,16 @@ type Handler struct {
 	DBService *database.Service
 }
 
-func NewHandler(DBService *database.Service) *Handler {
+func NewHandler(DBService *database.Service) (*Handler, error) {
 	h, err := database.NewService(database.DriverName, database.DataSource)
 	if err != nil {
-
+		return nil, fmt.Errorf("error opening database connection: %w", err)
 	}
+	return &Handler{DBService: h}, nil
 
 }
 
-func ShowLogin(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) ShowLogin(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("static/login.html")
 	if err != nil {
 		log.Printf("Error parsing login template: %v", err)
@@ -44,9 +47,8 @@ func ShowLogin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var person User
-	Service := database.NewService(r.Context)
 	if err := r.ParseForm(); err != nil {
 		log.Printf("Error parsing form: %v", err)
 		http.Error(w, "Bad request", http.StatusBadRequest)
