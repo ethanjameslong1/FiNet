@@ -24,10 +24,12 @@ const (
 	SQL_LOGIN = `SELECT id, username, created_at FROM users WHERE username = ? AND password = ?`
 )
 
+// primary type for interacting with Database
 type Service struct {
 	db *sql.DB
 }
 
+// helper type for dealing with user databases
 type Person struct {
 	Username  string
 	Password  string
@@ -35,18 +37,21 @@ type Person struct {
 	CreatedAt time.Time
 }
 
-var DriverName string = "mysql" //so I don't forget the Driver i'm using teehee
-var DataSource string = "ethan:040323@tcp(127.0.0.1:3306)/my_go_db"
+const (
+	DriverName  string = "mysql"                                     //so I don't forget the Driver i'm using teehee
+	DataSource  string = "ethan:040323@tcp(127.0.0.1:3306)/my_go_db" //see prior comment... teehee
+	CONNECTIONS int    = 50
+)
 
-// creates a Service object pointer with a database connection, requires a driver and datasource location
+// creates a Service object pointer with a database connection, requires a driver and datasource location, DriverName and DataSource constants
 func NewService(driverName, dataSourceName string) (*Service, error) {
 	db, err := sql.Open(driverName, dataSourceName)
 	if err != nil {
 		return nil, fmt.Errorf("error opening database connection: %w", err)
 	}
 	db.SetConnMaxLifetime(5 * time.Minute)
-	db.SetMaxOpenConns(50)
-	db.SetMaxIdleConns(50)
+	db.SetMaxOpenConns(CONNECTIONS)
+	db.SetMaxIdleConns(CONNECTIONS)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
 	defer cancel()
@@ -67,8 +72,8 @@ func (s *Service) Close() error {
 	return s.db.Close()
 }
 
-// adds a user to the database associated with a Service Object
-func AddUser(ctx context.Context, s *Service, name string, password string) (bool, error) {
+// adds a user to the database given creation context, name, and string
+func (s *Service) AddUser(ctx context.Context, name string, password string) (bool, error) {
 	r, err := s.db.ExecContext(ctx, SQL_INSERT_USER, name, password)
 	if err != nil {
 		return false, fmt.Errorf("Error inserting User: %w", err)
@@ -83,25 +88,41 @@ func AddUser(ctx context.Context, s *Service, name string, password string) (boo
 	return true, nil
 }
 
-func QueryUserByName(ctx context.Context, s *Service, name string) (Person, error) {
+// returns a Person type that matches query name
+func (s *Service) QueryUserByName(ctx context.Context, name string) (Person, error) {
 	person := Person{}
 	row := s.db.QueryRowContext(ctx, SQL_SELECT_USER_BY_USERNAME, name)
 	err := row.Scan(&person.Id, &person.Username, &person.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return Person{}, fmt.Errorf("user not found: %w", err)
+			return Person{}, fmt.Errorf("User not found: %w", err)
 		}
 		return Person{}, fmt.Errorf("Error finding User: %w", err)
 	}
 	return person, nil
 }
 
-func LoginQuery(ctx context.Context, s *Service, name string, password string) (Person, error) {
+// checks name and password and returns matching Person object
+func (s *Service) LoginQuery(ctx context.Context, name string, password string) (Person, error) {
 	person := Person{}
-	row := s.db.QueryRowContext(ctx, SQL_LOGIN, name)
-	err := row.Scan(&person.Id, &person.Username, &person.CreatedAt)
+	var UCount int
+	err := s.db.QueryRowContext(ctx, SQL_CHECK_USER_EXISTS, name).Scan(&UCount)
+	if err != nil {
+		return Person{}, fmt.Errorf("Error Checking User Existence: %w", err)
+	}
+	if UCount == 0 {
+		return Person{}, fmt.Errorf("Invalid Username or Password: user %s does not exist", name)
+	}
+
+	row := s.db.QueryRowContext(ctx, SQL_LOGIN, name, password)
+	err = row.Scan(&person.Id, &person.Username, &person.CreatedAt)
 	if err != nil {
 		return Person{}, fmt.Errorf("Error Logging in: %w", err)
 	}
-	return person, nil
+	if person.Username != "" {
+		return person, nil //successful login
+	} else {
+		return Person{}, fmt.Errorf("Invalid Username or Password: %w", err) //wrong password
+	}
+
 }

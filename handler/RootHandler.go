@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func RootHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) RootHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.Error(w, "404 not found", http.StatusNotFound)
 		return
