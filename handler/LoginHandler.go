@@ -19,7 +19,8 @@ type User struct {
 }
 
 type PageData struct {
-	Error string
+	Error error
+	user  User
 }
 
 type Handler struct {
@@ -82,7 +83,8 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-	err = tmpl.Execute(w, user)
+	data := PageData{Error: err, user: user}
+	err = tmpl.Execute(w, data)
 	if err != nil {
 		log.Printf("Error executing login template: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
