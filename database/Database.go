@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+const COMPILE_VERSION = "20250609_V_FINAL_FIX"
+
 // SQL Related Constants
 const (
 	//db.ExecContext
@@ -17,11 +19,11 @@ const (
 	//db.QueryRowContext
 	SQL_CHECK_USER_EXISTS       = `SELECT COUNT(*) FROM users WHERE username = ?`
 	SQL_SELECT_USER_PASSWORD    = `SELECT password FROM users WHERE username = ?`
-	SQL_SELECT_USER_BY_USERNAME = `SELECT id, username, created_at FROM users WHERE username = ?`
-	SQL_SELECT_USER_BY_ID       = `SELECT id, username, created_at FROM users WHERE id = ?`
+	SQL_SELECT_USER_BY_USERNAME = `SELECT id, username FROM users WHERE username = ?`
+	SQL_SELECT_USER_BY_ID       = `SELECT id, username FROM users WHERE id = ?`
 	SQL_UPDATE_USER_PASSWORD    = `UPDATE users SET password = ? WHERE username = ?`
 
-	SQL_LOGIN = `SELECT id, username, created_at FROM users WHERE username = ? AND password = ?`
+	SQL_LOGIN = `SELECT id, username FROM users WHERE username = ? AND password = ?`
 )
 
 // primary type for interacting with Database
@@ -31,10 +33,9 @@ type Service struct {
 
 // helper type for dealing with user databases
 type Person struct {
-	Username  string
-	Password  string
-	Id        int
-	CreatedAt sql.NullTime
+	Username string
+	Password string
+	Id       int
 }
 
 const (
@@ -62,6 +63,7 @@ func NewService(driverName, dataSourceName string) (*Service, error) {
 	}
 
 	fmt.Println("Connection established to database")
+	fmt.Printf("DEBUG: Database package compiled with version: %s\n", COMPILE_VERSION)
 
 	return &Service{db: db}, nil
 }
@@ -92,7 +94,7 @@ func (s *Service) AddUser(ctx context.Context, name string, password string) (bo
 func (s *Service) QueryUserByName(ctx context.Context, name string) (Person, error) {
 	person := Person{}
 	row := s.db.QueryRowContext(ctx, SQL_SELECT_USER_BY_USERNAME, name)
-	err := row.Scan(&person.Id, &person.Username, &person.CreatedAt)
+	err := row.Scan(&person.Id, &person.Username)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return Person{}, fmt.Errorf("User not found: %w", err)
@@ -115,7 +117,8 @@ func (s *Service) LoginQuery(ctx context.Context, name string, password string) 
 	}
 
 	row := s.db.QueryRowContext(ctx, SQL_LOGIN, name, password)
-	err = row.Scan(&person.Id, &person.Username, &person.CreatedAt)
+
+	err = row.Scan(&person.Id, &person.Username)
 	if err != nil {
 		return Person{}, fmt.Errorf("Error Logging in: %w", err)
 	}
