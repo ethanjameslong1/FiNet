@@ -34,12 +34,12 @@ type Person struct {
 	Username  string
 	Password  string
 	Id        int
-	CreatedAt time.Time
+	CreatedAt sql.NullTime
 }
 
 const (
 	DriverName  string = "mysql"                                     //so I don't forget the Driver i'm using teehee
-	DataSource  string = "ethan:040323@tcp(127.0.0.1:3306)/my_go_db" //see prior comment... teehee
+	DataSource  string = "ethan:040323@tcp(10.0.0.89:3306)/my_go_db" //see prior comment... teehee
 	CONNECTIONS int    = 50
 )
 
