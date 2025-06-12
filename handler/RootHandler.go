@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"fmt"
+	"log"
 	"net/http"
+	"text/template"
 )
 
 func (h *Handler) RootHandler(w http.ResponseWriter, r *http.Request) {
@@ -10,7 +11,17 @@ func (h *Handler) RootHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "404 not found", http.StatusNotFound)
 		return
 	}
-
-	fmt.Fprintf(w, "Hello You")
+	tmpl, err := template.ParseFiles("static/root.html")
+	if err != nil {
+		log.Printf("Error parsing login template: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		log.Printf("Error executing login template: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 
 }

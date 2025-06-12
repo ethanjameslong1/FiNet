@@ -2,6 +2,7 @@
 package handler
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -13,14 +14,18 @@ import (
 	"github.com/ethanjameslong1/GoCloudProject.git/database"
 )
 
-type User struct {
+type contextKey string
+
+const userContextKey contextKey = "authenticatedUser"
+
+type Guy struct {
 	Name     string `json:"username"`
 	Password string `json:"password"`
 }
 
 type PageData struct {
 	Error error
-	user  User
+	Guy   Guy
 }
 
 type Handler struct {
@@ -53,7 +58,7 @@ func (h *Handler) ShowLogin(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Form Logic
-	var user User
+	var user Guy
 	if err := r.ParseForm(); err != nil {
 		log.Printf("Error parsing form: %v", err)
 		http.Error(w, "Bad request", http.StatusBadRequest)
@@ -74,20 +79,8 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Login failed due to a server error", http.StatusInternalServerError) // 500 Internal Server Error
 		return
 	}
-	user.Name = person.Username
-	user.Password = person.Password
-
-	tmpl, err := template.ParseFiles("static/showUser.html")
-	if err != nil {
-		log.Printf("Error parsing login template: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-	data := PageData{Error: err, user: user}
-	err = tmpl.Execute(w, data)
-	if err != nil {
-		log.Printf("Error executing login template: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
+	//moving on with successful login, going to stock home page
+	ctx := context.WithValue(r.Context(), userContextKey, person)
+	r = r.WithContext(ctx)
+	http.Redirect(w, r, "/stock", http.StatusSeeOther)
 }

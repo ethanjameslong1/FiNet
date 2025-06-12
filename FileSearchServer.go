@@ -27,6 +27,7 @@ func main() {
 	mux.HandleFunc("/", handle.RootHandler)
 	mux.HandleFunc("GET /login", handle.ShowLogin)
 	mux.HandleFunc("POST /login", handle.LoginHandler)
+	mux.HandleFunc("GET /stock", handle.StockHandler)
 
 	fmt.Printf("port running on localhost:8080/\n")
 	if err := http.ListenAndServe(":8080", mux); err != nil {

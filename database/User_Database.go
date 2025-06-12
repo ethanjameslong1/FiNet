@@ -75,6 +75,7 @@ func (s *Service) Close() error {
 }
 
 // adds a user to the database given creation context, name, and string
+// currently not in use, don't plan on adding functionality to add users easily. For my current intents only the one user I added manually is neccesary
 func (s *Service) AddUser(ctx context.Context, name string, password string) (bool, error) {
 	r, err := s.db.ExecContext(ctx, SQL_INSERT_USER, name, password)
 	if err != nil {
