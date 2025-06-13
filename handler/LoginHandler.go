@@ -23,17 +23,12 @@ type Guy struct {
 	Password string `json:"password"`
 }
 
-type PageData struct {
-	Error error
-	Guy   Guy
-}
-
 type Handler struct {
 	DBService *database.Service
 }
 
-func NewHandler(DBService *database.Service) (*Handler, error) {
-	h, err := database.NewService(database.DriverName, database.DataSource)
+func NewUserHandler(DBService *database.Service) (*Handler, error) {
+	h, err := database.NewService(database.DriverName, database.UserDataSource)
 	if err != nil {
 		return nil, fmt.Errorf("error opening database connection: %w", err)
 	}
@@ -42,6 +37,10 @@ func NewHandler(DBService *database.Service) (*Handler, error) {
 }
 
 func (h *Handler) ShowLogin(w http.ResponseWriter, r *http.Request) {
+	_, ok := r.Context().Value(userContextKey).(database.Person)
+	if ok {
+		http.Redirect(w, r, "/stock", http.StatusSeeOther)
+	}
 	tmpl, err := template.ParseFiles("static/login.html")
 	if err != nil {
 		log.Printf("Error parsing login template: %v", err)
@@ -82,5 +81,18 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	//moving on with successful login, going to stock home page
 	ctx := context.WithValue(r.Context(), userContextKey, person)
 	r = r.WithContext(ctx)
-	http.Redirect(w, r, "/stock", http.StatusSeeOther)
+	tmpl, err := template.ParseFiles("static/stockAnalysisRequest.html")
+	if err != nil {
+		log.Printf("Error parsing stock template after login: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, PageData{Guy: Guy{Name: person.Username}, Error: nil})
+	if err != nil {
+		log.Printf("Error executing stock template after login: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
 }

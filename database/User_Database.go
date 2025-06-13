@@ -9,8 +9,6 @@ import (
 	"time"
 )
 
-const COMPILE_VERSION = "20250609_V_FINAL_FIX"
-
 // SQL Related Constants
 const (
 	//db.ExecContext
@@ -39,9 +37,9 @@ type Person struct {
 }
 
 const (
-	DriverName  string = "mysql"                                     //so I don't forget the Driver i'm using teehee
-	DataSource  string = "ethan:040323@tcp(10.0.0.89:3306)/my_go_db" //see prior comment... teehee
-	CONNECTIONS int    = 50
+	DriverName     string = "mysql"                                     //so I don't forget the Driver i'm using teehee
+	UserDataSource string = "ethan:040323@tcp(10.0.0.89:3306)/my_go_db" //see prior comment... teehee
+	CONNECTIONS    int    = 50
 )
 
 // creates a Service object pointer with a database connection, requires a driver and datasource location, DriverName and DataSource constants
@@ -63,7 +61,6 @@ func NewService(driverName, dataSourceName string) (*Service, error) {
 	}
 
 	fmt.Println("Connection established to database")
-	fmt.Printf("DEBUG: Database package compiled with version: %s\n", COMPILE_VERSION)
 
 	return &Service{db: db}, nil
 }
