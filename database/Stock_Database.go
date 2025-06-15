@@ -10,5 +10,5 @@ import (
 )
 
 const (
-	StockDataSource string = "ethan:040323@tcp(10.0.0.89:3307)/my_go_db"
+	StockDataSource string = "ethan:040323@tcp(10.0.0.89:3308)/my_go_db"
 )

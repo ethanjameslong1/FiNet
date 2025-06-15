@@ -18,7 +18,7 @@ type StockWeights struct {
 }
 
 type PageData struct {
-	Guy          Guy
+	Guy          UserLoginData
 	Error        error
 	StockWeights StockWeights
 	Interval     string
@@ -32,7 +32,7 @@ func (h *Handler) StockPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data := PageData{
-		Guy: Guy{
+		Guy: UserLoginData{
 			Name: user.Username,
 		},
 		Error: nil,
@@ -59,7 +59,7 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusFound) // StatusFound (302) is common for redirection
 		return
 	}
-	uData := Guy{Name: user.Username}
+	uData := UserLoginData{Name: user.Username}
 	if err := r.ParseForm(); err != nil {
 		log.Printf("Error parsing form: %v", err)
 		http.Error(w, "Bad request", http.StatusBadRequest)

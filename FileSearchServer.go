@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/ethanjameslong1/GoCloudProject.git/database"
 	"github.com/ethanjameslong1/GoCloudProject.git/handler"
-
 	"log"
 	"net/http"
 )

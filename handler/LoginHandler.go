@@ -2,23 +2,22 @@
 package handler
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/ethanjameslong1/GoCloudProject.git/database"
+	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"strings"
 	"text/template"
-
-	"github.com/ethanjameslong1/GoCloudProject.git/database"
 )
 
 type contextKey string
 
 const userContextKey contextKey = "authenticatedUser"
 
-type Guy struct {
+type UserLoginData struct {
 	Name     string `json:"username"`
 	Password string `json:"password"`
 }
@@ -57,7 +56,7 @@ func (h *Handler) ShowLogin(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Form Logic
-	var user Guy
+	var user UserLoginData
 	if err := r.ParseForm(); err != nil {
 		log.Printf("Error parsing form: %v", err)
 		http.Error(w, "Bad request", http.StatusBadRequest)
@@ -67,6 +66,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "name or password empty", http.StatusNoContent)
 		return
 	}
+
 	//Referencing DataBase
 	person, err := h.DBService.LoginQuery(r.Context(), r.FormValue("username"), r.FormValue("password"))
 	if err != nil {
@@ -78,9 +78,21 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Login failed due to a server error", http.StatusInternalServerError) // 500 Internal Server Error
 		return
 	}
-	//moving on with successful login, going to stock home page
-	ctx := context.WithValue(r.Context(), userContextKey, person)
-	r = r.WithContext(ctx)
+
+	// establishing UUID and Cookie
+	newUUID := uuid.New()
+	cookie := http.Cookie{
+		Name:     "SessionCookie",
+		Value:    newUUID.String(),
+		Path:     "/",
+		MaxAge:   24 * 60 * 60, //1 day
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	}
+	http.SetCookie(w, &cookie)
+
+	//HTML Stuff
 	tmpl, err := template.ParseFiles("static/stockAnalysisRequest.html")
 	if err != nil {
 		log.Printf("Error parsing stock template after login: %v", err)
@@ -88,7 +100,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = tmpl.Execute(w, PageData{Guy: Guy{Name: person.Username}, Error: nil})
+	err = tmpl.Execute(w, PageData{Guy: UserLoginData{Name: person.Username}, Error: nil})
 	if err != nil {
 		log.Printf("Error executing stock template after login: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
