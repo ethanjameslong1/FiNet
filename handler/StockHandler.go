@@ -18,24 +18,25 @@ type StockWeights struct {
 }
 
 type PageData struct {
-	Guy          UserLoginData
+	UserData     UserLoginData
 	Error        error
 	StockWeights StockWeights
 	Interval     string
 }
 
 func (h *Handler) StockPageHandler(w http.ResponseWriter, r *http.Request) {
-	user, ok := r.Context().Value(userContextKey).(database.Person)
+	user, ok := r.Context().Value(userContextKey).(database.User)
 	if !ok {
 		log.Printf("Error: User not found in context for StockHandler. Redirecting to login.")
 		http.Redirect(w, r, "/login", http.StatusFound) // StatusFound (302) is common for redirection
 		return
 	}
 	data := PageData{
-		Guy: UserLoginData{
+		UserData: UserLoginData{
 			Name: user.Username,
 		},
-		Error: nil,
+		Error:    nil,
+		Interval: "Daily",
 	}
 
 	tmpl, err := template.ParseFiles("static/stockAnalysisRequest.html")
@@ -53,7 +54,7 @@ func (h *Handler) StockPageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
-	user, ok := r.Context().Value(userContextKey).(database.Person)
+	user, ok := r.Context().Value(userContextKey).(database.User)
 	if !ok {
 		log.Printf("Error: User not found in context for StockHandler. Redirecting to login.")
 		http.Redirect(w, r, "/login", http.StatusFound) // StatusFound (302) is common for redirection
@@ -72,7 +73,7 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-	err = tmpl.Execute(w, PageData{Guy: uData, StockWeights: sData, Error: nil})
+	err = tmpl.Execute(w, PageData{UserData: uData, StockWeights: sData, Error: nil})
 	if err != nil {
 		log.Printf("Error executing login template: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)

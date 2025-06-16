@@ -23,7 +23,7 @@
     </h1>
     <p class="text-center text-gray-600 mb-8 text-md sm:text-lg">
       Thanks for submitting your custom analysis parameters, <span
-        class="font-semibold text-indigo-700">{{.Guy.Name}}</span>!
+        class="font-semibold text-indigo-700">{{.UserData.Name}}</span>!
       Here's a summary of the weights you've set for your stock analysis.
     </p>
 
@@ -33,31 +33,31 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
         <div class="flex justify-between items-center bg-white p-3 rounded-md shadow-sm">
           <span class="font-medium">Open Price Weight:</span>
-          <span class="font-bold text-indigo-600">{{.OpenPriceWeight}}</span>
+          <span class="font-bold text-indigo-600">{{.StockWeights.OpenPriceWeight}}</span>
         </div>
         <div class="flex justify-between items-center bg-white p-3 rounded-md shadow-sm">
           <span class="font-medium">High Price Weight:</span>
-          <span class="font-bold text-indigo-600">{{.HighPriceWeight}}</span>
+          <span class="font-bold text-indigo-600">{{.StockWeights.HighPriceWeight}}</span>
         </div>
         <div class="flex justify-between items-center bg-white p-3 rounded-md shadow-sm">
           <span class="font-medium">Low Price Weight:</span>
-          <span class="font-bold text-indigo-600">{{.LowPriceWeight}}</span>
+          <span class="font-bold text-indigo-600">{{.StockWeights.LowPriceWeight}}</span>
         </div>
         <div class="flex justify-between items-center bg-white p-3 rounded-md shadow-sm">
           <span class="font-medium">Close Price Weight:</span>
-          <span class="font-bold text-indigo-600">{{.ClosePriceWeight}}</span>
+          <span class="font-bold text-indigo-600">{{.StockWeights.ClosePriceWeight}}</span>
         </div>
         <div class="flex justify-between items-center bg-white p-3 rounded-md shadow-sm">
           <span class="font-medium">Volume Weight:</span>
-          <span class="font-bold text-indigo-600">{{.VolumeWeight}}</span>
+          <span class="font-bold text-indigo-600">{{.StockWeights.VolumeWeight}}</span>
         </div>
         <div class="flex justify-between items-center bg-white p-3 rounded-md shadow-sm">
           <span class="font-medium">% Change (Close vs Open) Weight:</span>
-          <span class="font-bold text-indigo-600">{{.PercChangeWeight}}</span>
+          <span class="font-bold text-indigo-600">{{.StockWeights.PercChangeWeight}}</span>
         </div>
         <div class="flex justify-between items-center bg-white p-3 rounded-md shadow-sm">
           <span class="font-medium">% Range (High vs Low) Weight:</span>
-          <span class="font-bold text-indigo-600">{{.PercRangeWeight}}</span>
+          <span class="font-bold text-indigo-600">{{.StockWeights.PercRangeWeight}}</span>
         </div>
       </div>
     </div>

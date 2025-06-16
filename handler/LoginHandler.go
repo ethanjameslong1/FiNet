@@ -1,16 +1,15 @@
-// LoginHandler.go
 package handler
 
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"github.com/ethanjameslong1/GoCloudProject.git/database"
 	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"strings"
 	"text/template"
+	"time"
 )
 
 type contextKey string
@@ -23,30 +22,37 @@ type UserLoginData struct {
 }
 
 type Handler struct {
-	DBService *database.Service
+	UserDBService    *database.DBService
+	SessionDBService *database.DBService
+	SessionDuration  time.Duration
 }
 
-func NewUserHandler(DBService *database.Service) (*Handler, error) {
-	h, err := database.NewService(database.DriverName, database.UserDataSource)
-	if err != nil {
-		return nil, fmt.Errorf("error opening database connection: %w", err)
+func NewHandler(userDB *database.DBService, sessionDB *database.DBService, sessionDuration time.Duration) (*Handler, error) {
+	if userDB == nil || sessionDB == nil {
+		return nil, errors.New("database services cannot be nil")
 	}
-	return &Handler{DBService: h}, nil
-
+	return &Handler{
+		UserDBService:    userDB,
+		SessionDBService: sessionDB,
+		SessionDuration:  sessionDuration,
+	}, nil
 }
 
 func (h *Handler) ShowLogin(w http.ResponseWriter, r *http.Request) {
-	_, ok := r.Context().Value(userContextKey).(database.Person)
+
+	_, ok := r.Context().Value(userContextKey).(database.User)
 	if ok {
 		http.Redirect(w, r, "/stock", http.StatusSeeOther)
+		return
 	}
+
 	tmpl, err := template.ParseFiles("static/login.html")
 	if err != nil {
 		log.Printf("Error parsing login template: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-	err = tmpl.Execute(w, PageData{}) //don't see a reason for adding Request context into this execution
+	err = tmpl.Execute(w, PageData{})
 	if err != nil {
 		log.Printf("Error executing login template: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -55,44 +61,49 @@ func (h *Handler) ShowLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	// Form Logic
-	var user UserLoginData
 	if err := r.ParseForm(); err != nil {
 		log.Printf("Error parsing form: %v", err)
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
-	if r.FormValue("username") == "" || r.FormValue("password") == "" {
-		http.Error(w, "name or password empty", http.StatusNoContent)
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+
+	if username == "" || password == "" {
+		http.Error(w, "Username or password cannot be empty", http.StatusBadRequest)
 		return
 	}
 
-	//Referencing DataBase
-	person, err := h.DBService.LoginQuery(r.Context(), r.FormValue("username"), r.FormValue("password"))
+	user, err := h.UserDBService.AuthenticateUser(r.Context(), username, password)
 	if err != nil {
-		log.Printf("Login failed for user '%s': %v", user.Name, err) // Log the actual error for debugging
-		if errors.Is(err, sql.ErrNoRows) || strings.Contains(err.Error(), "Invalid Username or Password") {
+		log.Printf("Login attempt failed for user '%s': %v", username, err)
+		if errors.Is(err, sql.ErrNoRows) || strings.Contains(err.Error(), "user not found") || strings.Contains(err.Error(), "invalid password") {
 			http.Error(w, "Invalid username or password", http.StatusUnauthorized)
 			return
 		}
-		http.Error(w, "Login failed due to a server error", http.StatusInternalServerError) // 500 Internal Server Error
+		http.Error(w, "Login failed due to a server error", http.StatusInternalServerError)
 		return
 	}
 
-	// establishing UUID and Cookie
-	newUUID := uuid.New()
+	sessionID := uuid.New()
+	_, err = h.SessionDBService.AddSession(r.Context(), sessionID, user.ID, h.SessionDuration)
+	if err != nil {
+		log.Printf("Error adding session for user '%s': %v", user.Username, err)
+		http.Error(w, "Failed to create session", http.StatusInternalServerError)
+		return
+	}
+
 	cookie := http.Cookie{
 		Name:     "SessionCookie",
-		Value:    newUUID.String(),
+		Value:    sessionID.String(),
 		Path:     "/",
-		MaxAge:   24 * 60 * 60, //1 day
+		Expires:  time.Now().Add(h.SessionDuration),
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
 	}
 	http.SetCookie(w, &cookie)
 
-	//HTML Stuff
 	tmpl, err := template.ParseFiles("static/stockAnalysisRequest.html")
 	if err != nil {
 		log.Printf("Error parsing stock template after login: %v", err)
@@ -100,11 +111,10 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = tmpl.Execute(w, PageData{Guy: UserLoginData{Name: person.Username}, Error: nil})
+	err = tmpl.Execute(w, PageData{UserData: UserLoginData{Name: user.Username}, Error: nil}) // Use user.Username
 	if err != nil {
 		log.Printf("Error executing stock template after login: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-
 }

@@ -13,7 +13,7 @@ func (h *Handler) RootHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "404 not found", http.StatusNotFound)
 		return
 	}
-	_, ok := r.Context().Value(userContextKey).(database.Person)
+	_, ok := r.Context().Value(userContextKey).(database.User)
 	if ok {
 		http.Redirect(w, r, "/stock", http.StatusSeeOther)
 	}

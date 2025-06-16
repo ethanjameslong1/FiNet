@@ -33,6 +33,19 @@ func (s *DBService) AddUser(ctx context.Context, name string, password string) (
 func (s *DBService) GetUserByName(ctx context.Context, username string) (User, error) {
 	person := User{}
 	row := s.db.QueryRowContext(ctx, SQL_SELECT_USER_BY_USERNAME, username)
+	err := row.Scan(&person.ID, &person.Username, &person.PasswordHash)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return User{}, fmt.Errorf("User not found: %w", err)
+		}
+		return User{}, fmt.Errorf("Error finding User: %w", err)
+	}
+	return person, nil
+}
+
+func (s *DBService) GetUserByID(ctx context.Context, ID int) (User, error) {
+	person := User{}
+	row := s.db.QueryRowContext(ctx, SQL_SELECT_USER_BY_ID, ID)
 	err := row.Scan(&person.ID, &person.Username)
 	if err != nil {
 		if err == sql.ErrNoRows {

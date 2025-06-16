@@ -13,22 +13,22 @@ import (
 // SQL Related Constants (moved from logindb.go)
 const (
 	// User Management Queries
-	SQL_INSERT_USER             = `INSERT INTO users (username, password_hash) VALUES (?, ?)` // Changed to password_hash
+	SQL_INSERT_USER             = `INSERT INTO users (username, password) VALUES (?, ?)` // Changed to password_hash
 	SQL_CHECK_USER_EXISTS       = `SELECT COUNT(*) FROM users WHERE username = ?`
-	SQL_SELECT_USER_PASSWORD    = `SELECT password_hash FROM users WHERE username = ?`               // Changed to password_hash
-	SQL_SELECT_USER_BY_USERNAME = `SELECT id, username, password_hash FROM users WHERE username = ?` // Added password_hash for login flow
+	SQL_SELECT_USER_PASSWORD    = `SELECT password FROM users WHERE username = ?`               // Changed to password_hash
+	SQL_SELECT_USER_BY_USERNAME = `SELECT id, username, password FROM users WHERE username = ?` // Added password_hash for login flow
 	SQL_SELECT_USER_BY_ID       = `SELECT id, username FROM users WHERE id = ?`
-	SQL_UPDATE_USER_PASSWORD    = `UPDATE users SET password_hash = ? WHERE username = ?` // Changed to password_hash
+	SQL_UPDATE_USER_PASSWORD    = `UPDATE users SET password = ? WHERE username = ?` // Changed to password_hash
 	// Removed SQL_LOGIN - direct plaintext password query is bad
 )
 
 // Session Management Queries (from sessiondb.go)
 const (
-	SQL_INSERT_SESSION            = `INSERT INTO sessions (session_id, user_id, expires_at) VALUES (?, ?, ?)`   // Changed to user_id
-	SQL_SELECT_SESSION_BY_ID      = `SELECT user_id, created_at, expires_at FROM sessions WHERE session_id = ?` // Changed to user_id
-	SQL_DELETE_SESSION_BY_ID      = `DELETE FROM sessions WHERE session_id = ?`
+	SQL_INSERT_SESSION            = `INSERT INTO sessions (sessions_id, user_id, expires_at) VALUES (?, ?, ?)`   // Changed to user_id
+	SQL_SELECT_SESSION_BY_ID      = `SELECT user_id, created_at, expires_at FROM sessions WHERE sessions_id = ?` // Changed to user_id
+	SQL_DELETE_SESSION_BY_ID      = `DELETE FROM sessions WHERE sessions_id = ?`
 	SQL_DELETE_EXPIRED_SESSIONS   = `DELETE FROM sessions WHERE expires_at < NOW()`
-	SQL_UPDATE_SESSION_EXPIRATION = `UPDATE sessions SET expires_at = ? WHERE session_id = ?`
+	SQL_UPDATE_SESSION_EXPIRATION = `UPDATE sessions SET expires_at = ? WHERE sessions_id = ?`
 	// If you want to list/delete sessions by username, you'd need a join or another lookup
 	// SQL_SELECT_SESSIONS_BY_USERNAME = `SELECT s.session_id, s.created_at, s.expires_at FROM sessions s JOIN users u ON s.user_id = u.id WHERE u.username = ?`
 	// SQL_DELETE_ALL_SESSIONS_FOR_USER = `DELETE FROM sessions WHERE user_id IN (SELECT id FROM users WHERE username = ?)`
@@ -48,8 +48,8 @@ type User struct { // Renamed from Person to User
 
 const (
 	DriverName        string = "mysql"
-	UserDataSource    string = "ethan:040323@tcp(10.0.0.89:3306)/my_go_db"
-	SessionDataSource string = "ethan:040323@tcp(10.0.0.89:3307)/my_go_db" // Assuming separate DB for sessions
+	UserDataSource    string = "ethan:040323@tcp(10.0.0.89:3306)/my_go_db?parseTime=true"
+	SessionDataSource string = "ethan:040323@tcp(10.0.0.89:3307)/my_go_db?parseTime=true" // Assuming separate DB for sessions
 	CONNECTIONS       int    = 50
 )
 

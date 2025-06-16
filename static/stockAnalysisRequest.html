@@ -149,9 +149,9 @@
     </form>
 
     <!-- Dynamic User Greeting (from Go handler) -->
-    {{if .Guy.Name}}
+    {{if .UserData.Name}}
     <p class="text-center text-gray-500 text-sm mt-8">
-      Currently logged in as: <span class="font-semibold text-gray-700">{{.Guy.Name}}</span>
+      Currently logged in as: <span class="font-semibold text-gray-700">{{.UserData.Name}}</span>
     </p>
     {{end}}
 
