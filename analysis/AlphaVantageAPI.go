@@ -6,14 +6,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 )
 
 // global constants
 const (
-	ApiKey = "FTMAJAOUIWD2Z7L9"
-	ApiURL = "https://www.alphavantage.co/query?function=%v&symbol=%v&apikey=%v"
+	ApiKey                  = "FTMAJAOUIWD2Z7L9"
+	ApiURL                  = "https://www.alphavantage.co/query?function=%v&symbol=%v&apikey=%v"
+	WeeklyAdjustedFunction  = "TIME_SERIES_WEEKLY_ADJUSTED"
+	MonthlyAdjustedFunction = "TIME_SERIES_MONTHLY_ADJUSTED"
 )
 
 var httpClient = &http.Client{
@@ -117,4 +120,24 @@ func RetrieveStockDataWeekly(ctx context.Context, params AlphaVantageParam) (*St
 		return nil, fmt.Errorf("Error unmarshalling response: %w", err)
 	}
 	return &stockData, nil
+}
+
+func MakeWeeklyDataSlice(ctx context.Context, symbols []string) ([]*StockDataWeekly, error) {
+	paramTemplate := AlphaVantageParam{Function: WeeklyAdjustedFunction, APIKey: ApiKey}
+	dataSlice := make([]*StockDataWeekly, len(symbols))
+	var allErrors []error
+	var err error
+	for i, s := range symbols {
+		paramTemplate.Symbol = s
+		dataSlice[i], err = RetrieveStockDataWeekly(ctx, paramTemplate)
+		if err != nil {
+			log.Printf("Error retrieving stock data for symbol %q: %v", s, err)
+			allErrors = append(allErrors, fmt.Errorf("symbol %q: %w", s, err))
+			if len(allErrors) > 8 {
+				return nil, fmt.Errorf("Too many failed API calls, check symbols list and API. atleast 9 failed API calls")
+			}
+			continue
+		}
+	}
+	return dataSlice, nil
 }
