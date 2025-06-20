@@ -1,26 +1,19 @@
 package handler
 
 import (
-	"github.com/ethanjameslong1/GoCloudProject.git/database"
+	"fmt"
 	"log"
 	"net/http"
 	"text/template"
-)
 
-type StockWeights struct {
-	OpenPriceWeight  string
-	HighPriceWeight  string
-	ClosePriceWeight string
-	LowPriceWeight   string
-	VolumeWeight     string
-	PercChangeWeight string
-	PercRangeWeight  string
-}
+	"github.com/ethanjameslong1/GoCloudProject.git/analysis"
+	"github.com/ethanjameslong1/GoCloudProject.git/database"
+)
 
 type PageData struct {
 	UserData     UserLoginData
 	Error        error
-	StockWeights StockWeights
+	StockWeights analysis.StockWeights
 	Interval     string
 }
 
@@ -28,7 +21,7 @@ func (h *Handler) StockPageHandler(w http.ResponseWriter, r *http.Request) {
 	user, ok := r.Context().Value(userContextKey).(database.User)
 	if !ok {
 		log.Printf("Error: User not found in context for StockHandler. Redirecting to login.")
-		http.Redirect(w, r, "/login", http.StatusFound) // StatusFound (302) is common for redirection
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 	data := PageData{
@@ -66,13 +59,23 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
-	sData := StockWeights{OpenPriceWeight: r.FormValue("weightCurrentOpen"), HighPriceWeight: r.FormValue("weightCurrentHigh"), ClosePriceWeight: r.FormValue("weightCurrentClose"), LowPriceWeight: r.FormValue("weightCurrentLow"), VolumeWeight: r.FormValue("weightCurrentVolume"), PercChangeWeight: r.FormValue("weightCloseOpenPctChange"), PercRangeWeight: r.FormValue("weightHighLowPctRange")}
+	sData := analysis.StockWeights{OpenPriceWeight: r.FormValue("weightCurrentOpen"), HighPriceWeight: r.FormValue("weightCurrentHigh"), ClosePriceWeight: r.FormValue("weightCurrentClose"), LowPriceWeight: r.FormValue("weightCurrentLow"), VolumeWeight: r.FormValue("weightCurrentVolume"), PercChangeWeight: r.FormValue("weightCloseOpenPctChange"), PercRangeWeight: r.FormValue("weightHighLowPctRange")}
 	tmpl, err := template.ParseFiles("static/stockAnalysisRequestComplete.html")
 	if err != nil {
 		log.Printf("Error parsing login template: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
+	param := analysis.AlphaVantageParam{Function: "TIME_SERIES_WEEKLY_ADJUSTED", Symbol: "IBM", Datatype: "json", APIKey: analysis.ApiKey}
+	stockData, err := analysis.RetrieveStockDataWeekly(r.Context(), param)
+	// _, err = analysis.RetrieveStockDataWeekly(r.Context(), param)
+	if err != nil {
+		log.Printf("Error retrieving stock data from API: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
+
+	fmt.Println(*stockData)
+
 	err = tmpl.Execute(w, PageData{UserData: uData, StockWeights: sData, Error: nil})
 	if err != nil {
 		log.Printf("Error executing login template: %v", err)
@@ -81,5 +84,3 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-
-//API CALL AND ANALYSIS LOGIC

@@ -17,7 +17,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 				http.Error(w, "Bad Request", http.StatusBadRequest)
 				return
 			}
-			next.ServeHTTP(w, r)
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 
@@ -34,7 +34,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 				Secure:   true,
 				SameSite: http.SameSiteLaxMode,
 			})
-			next.ServeHTTP(w, r)
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 
@@ -58,7 +58,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 				Secure:   true,
 				SameSite: http.SameSiteLaxMode,
 			})
-			next.ServeHTTP(w, r)
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 
@@ -67,6 +67,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 			log.Printf("AuthMiddleware: Failed to get user details for user ID '%d': %v", session.UserID, userErr)
 			http.SetCookie(w, &http.Cookie{Name: "SessionCookie", Value: "", Path: "/", Expires: time.Unix(0, 0), HttpOnly: true, Secure: true, SameSite: http.SameSiteLaxMode})
 			http.Error(w, "Authentication error", http.StatusInternalServerError)
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 

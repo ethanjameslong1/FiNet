@@ -48,8 +48,8 @@ type User struct { // Renamed from Person to User
 
 const (
 	DriverName        string = "mysql"
-	UserDataSource    string = "ethan:040323@tcp(10.0.0.89:3306)/my_go_db?parseTime=true"
-	SessionDataSource string = "ethan:040323@tcp(10.0.0.89:3307)/my_go_db?parseTime=true" // Assuming separate DB for sessions
+	UserDataSource    string = "ethan:040323@tcp(10.0.0.173:3306)/my_go_db?parseTime=true"
+	SessionDataSource string = "ethan:040323@tcp(10.0.0.173:3307)/my_go_db?parseTime=true" // Assuming separate DB for sessions
 	CONNECTIONS       int    = 50
 )
 
