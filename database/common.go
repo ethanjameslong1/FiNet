@@ -13,12 +13,12 @@ import (
 // SQL Related Constants (moved from logindb.go)
 const (
 	// User Management Queries
-	SQL_INSERT_USER             = `INSERT INTO users (username, password) VALUES (?, ?)` // Changed to password_hash
+	SQL_INSERT_USER             = `INSERT INTO users (username, password_hash) VALUES (?, ?)` // Changed to password_hash
 	SQL_CHECK_USER_EXISTS       = `SELECT COUNT(*) FROM users WHERE username = ?`
-	SQL_SELECT_USER_PASSWORD    = `SELECT password FROM users WHERE username = ?`               // Changed to password_hash
-	SQL_SELECT_USER_BY_USERNAME = `SELECT id, username, password FROM users WHERE username = ?` // Added password_hash for login flow
+	SQL_SELECT_USER_PASSWORD    = `SELECT password_hash FROM users WHERE username = ?`               // Changed to password_hash
+	SQL_SELECT_USER_BY_USERNAME = `SELECT id, username, password_hash FROM users WHERE username = ?` // Added password_hash for login flow
 	SQL_SELECT_USER_BY_ID       = `SELECT id, username FROM users WHERE id = ?`
-	SQL_UPDATE_USER_PASSWORD    = `UPDATE users SET password = ? WHERE username = ?` // Changed to password_hash
+	SQL_UPDATE_USER_PASSWORD    = `UPDATE users SET password_hash = ? WHERE username = ?` // Changed to password_hash
 	// Removed SQL_LOGIN - direct plaintext password query is bad
 )
 
@@ -47,10 +47,9 @@ type User struct { // Renamed from Person to User
 }
 
 const (
-	DriverName        string = "mysql"
-	UserDataSource    string = "ethan:040323@tcp(10.0.0.173:3306)/my_go_db?parseTime=true"
-	SessionDataSource string = "ethan:040323@tcp(10.0.0.173:3307)/my_go_db?parseTime=true" // Assuming separate DB for sessions
-	CONNECTIONS       int    = 50
+	DriverName            string = "mysql"
+	UserSessionDataSource string = "ethan:040323@tcp(10.0.0.173:3306)user_session_db/?parseTime=true"
+	CONNECTIONS           int    = 50
 )
 
 // NewDBService creates a DBService object pointer with a database connection.

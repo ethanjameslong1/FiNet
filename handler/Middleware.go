@@ -22,7 +22,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		sessionID := cookie.Value
-		session, dbErr := h.SessionDBService.GetSessionByID(r.Context(), sessionID)
+		session, dbErr := h.UserSessionDBService.GetSessionByID(r.Context(), sessionID)
 		if dbErr != nil {
 			log.Printf("AuthMiddleware: Session validation failed for session ID '%s': %v", sessionID, dbErr)
 			http.SetCookie(w, &http.Cookie{
@@ -43,7 +43,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 			go func() {
 				deleteCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 				defer cancel()
-				_, delErr := h.SessionDBService.DeleteSessionByID(deleteCtx, sessionID)
+				_, delErr := h.UserSessionDBService.DeleteSessionByID(deleteCtx, sessionID)
 				if delErr != nil {
 					log.Printf("AuthMiddleware: Failed to delete expired session '%s': %v", sessionID, delErr)
 				}
@@ -62,7 +62,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		user, userErr := h.UserDBService.GetUserByID(r.Context(), session.UserID)
+		user, userErr := h.UserSessionDBService.GetUserByID(r.Context(), session.UserID)
 		if userErr != nil {
 			log.Printf("AuthMiddleware: Failed to get user details for user ID '%d': %v", session.UserID, userErr)
 			http.SetCookie(w, &http.Cookie{Name: "SessionCookie", Value: "", Path: "/", Expires: time.Unix(0, 0), HttpOnly: true, Secure: true, SameSite: http.SameSiteLaxMode})

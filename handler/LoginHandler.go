@@ -22,19 +22,17 @@ type UserLoginData struct {
 }
 
 type Handler struct {
-	UserDBService    *database.DBService
-	SessionDBService *database.DBService
-	SessionDuration  time.Duration
+	UserSessionDBService *database.DBService
+	SessionDuration      time.Duration
 }
 
-func NewHandler(userDB *database.DBService, sessionDB *database.DBService, sessionDuration time.Duration) (*Handler, error) {
-	if userDB == nil || sessionDB == nil {
+func NewHandler(UserSessionDB *database.DBService, sessionDuration time.Duration) (*Handler, error) {
+	if UserSessionDB == nil {
 		return nil, errors.New("database services cannot be nil")
 	}
 	return &Handler{
-		UserDBService:    userDB,
-		SessionDBService: sessionDB,
-		SessionDuration:  sessionDuration,
+		UserSessionDBService: UserSessionDB,
+		SessionDuration:      sessionDuration,
 	}, nil
 }
 
@@ -74,7 +72,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.UserDBService.AuthenticateUser(r.Context(), username, password)
+	user, err := h.UserSessionDBService.AuthenticateUser(r.Context(), username, password)
 	if err != nil {
 		log.Printf("Login attempt failed for user '%s': %v", username, err)
 		if errors.Is(err, sql.ErrNoRows) || strings.Contains(err.Error(), "user not found") || strings.Contains(err.Error(), "invalid password") {
@@ -86,7 +84,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessionID := uuid.New()
-	_, err = h.SessionDBService.AddSession(r.Context(), sessionID, user.ID, h.SessionDuration)
+	_, err = h.UserSessionDBService.AddSession(r.Context(), sessionID, user.ID, h.SessionDuration)
 	if err != nil {
 		log.Printf("Error adding session for user '%s': %v", user.Username, err)
 		http.Error(w, "Failed to create session", http.StatusInternalServerError)

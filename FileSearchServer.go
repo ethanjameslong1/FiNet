@@ -14,16 +14,11 @@ import (
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	Uservice, err := database.NewDBService(ctx, database.UserDataSource)
+	serv, err := database.NewDBService(ctx, database.UserSessionDataSource)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer Uservice.Close()
-	Sservice, err := database.NewDBService(ctx, database.SessionDataSource)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer Sservice.Close()
+	defer serv.Close()
 
 	go func() {
 		ticker := time.NewTicker(1 * time.Hour) // Clean up every hour
@@ -34,7 +29,7 @@ func main() {
 				log.Println("Session cleanup goroutine stopping.")
 				return
 			case <-ticker.C:
-				rowsAffected, err := Sservice.DeleteExpiredSessions(ctx)
+				rowsAffected, err := serv.DeleteExpiredSessions(ctx)
 				if err != nil {
 					log.Printf("Error during session cleanup: %v", err)
 				} else {
@@ -44,7 +39,7 @@ func main() {
 		}
 	}()
 	sessionLifetime := 24 * time.Hour
-	appHandler, err := handler.NewHandler(Uservice, Sservice, sessionLifetime)
+	appHandler, err := handler.NewHandler(serv, sessionLifetime)
 	if err != nil {
 		log.Fatal(err)
 	}

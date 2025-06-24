@@ -32,7 +32,7 @@ type StockDataWeekly struct {
 		TimeZone      string `json:"4. Time Zone"`
 	} `json:"Meta Data"`
 
-	TimeSeriesDaily map[string]struct {
+	TimeSeriesWeekly map[string]struct {
 		Open      string `json:"1. open"`
 		High      string `json:"2. high"`
 		Low       string `json:"3. low"`
