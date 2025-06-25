@@ -9,9 +9,9 @@ services:
     container_name: user_session_db
     environment:
       MYSQL_DATABASE: user_session_db
-      MYSQL_USER: your_user
-      MYSQL_PASSWORD: your_password
-      MYSQL_ROOT_PASSWORD: your_root_password # IMPORTANT: Set a strong password here
+      MYSQL_USER: ethan
+      MYSQL_PASSWORD: 040323
+      MYSQL_ROOT_PASSWORD: Front2Back!
     ports:
       - "3306:3306" # Expose only for local development/testing, secure this in production
     volumes:
@@ -22,18 +22,18 @@ services:
 
   stock_prediction_db:
     build:
-      context: ./stock_prediction_db # Directory containing stock_prediction_db Dockerfile and complex_init.sql
+      context: ./stock_prediction_db
       dockerfile: Dockerfile
     container_name: stock_prediction_db
     environment:
       MYSQL_DATABASE: stock_prediction_db
-      MYSQL_USER: your_complex_user
-      MYSQL_PASSWORD: your_complex_password
-      MYSQL_ROOT_PASSWORD: your_complex_root_password # IMPORTANT: Set a strong password here
+      MYSQL_USER: ethan
+      MYSQL_PASSWORD: 040323
+      MYSQL_ROOT_PASSWORD: Front2Back!
     ports:
-      - "3307:3306" # Map to a different host port if you run both locally
+      - "3307:3306"
     volumes:
-      - stock_prediction_data:/var/lib/mysql # Persist data
+      - stock_prediction_data:/var/lib/mysql
     networks:
       - backend_network
     restart: always

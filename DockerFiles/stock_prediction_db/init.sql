@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS predictor_stocks (
 
 CREATE TABLE IF NOT EXISTS predictable_stocks (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    predictor_id UUID NOT NULL, -- Ideally this would be able to be some kind of vector that can fit between 1 and 3 predictors
     stock_symbol VARCHAR(10) NOT NULL,
     predicted_slope DECIMAL(8, 6) NOT NULL,
     prediction_model_id INT, --if this could just somehow hold 1-3 id values that would solve my problem.
