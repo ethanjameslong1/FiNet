@@ -30,7 +30,7 @@ func (h *Handler) AddUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	username, password := r.FormValue("username"), r.FormValue("password")
-	_, err = h.UserDBService.AddUser(r.Context(), username, password)
+	_, err = h.UserSessionDBService.AddUser(r.Context(), username, password)
 	if err != nil {
 		log.Printf("Error adding user: %v", err)
 		http.Error(w, "Bad request", http.StatusBadRequest)

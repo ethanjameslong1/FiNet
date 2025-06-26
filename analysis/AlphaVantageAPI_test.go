@@ -24,7 +24,7 @@ func TestMakeWeeklyDataSlice(t *testing.T) {
 	}
 	for i, stockData := range dataSlice {
 		if stockData == nil {
-			t.Logf("Data for symbol #%d (index %d) is NIL", i)
+			t.Logf("Data for symbol %v is NIL", AlphaVantageSymbols[i])
 			continue
 		}
 		jsonData, marshalErr := json.MarshalIndent(stockData, "", "  ")
@@ -34,7 +34,7 @@ func TestMakeWeeklyDataSlice(t *testing.T) {
 		}
 		t.Logf("\n---Retrieved Stock Data for Symbol: %s (index %d) ---", stockData.MetaData.Symbol, i)
 		t.Logf("%s", jsonData)
-		t.Logf("-------------------------------------------------------")
+		t.Log("-------------------------------------------------------")
 
 		time.Sleep(1 * time.Second)
 	}
