@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  user_session_db:
+    build:
+      context: ./user_session_db
+      dockerfile: Dockerfile
+    container_name: user_session_db
+    environment:
+      MYSQL_DATABASE: user_session_db
+      MYSQL_USER: ethan
+      MYSQL_PASSWORD: 040323
+      MYSQL_ROOT_PASSWORD: Front2Back!
+    volumes:
+      - user_session_data:/var/lib/mysql
+    networks:
+      - backend_network
+    restart: always
+
+  stock_prediction_db:
+    build:
+      context: ./stock_prediction_db
+      dockerfile: Dockerfile
+    container_name: stock_prediction_db
+    environment:
+      MYSQL_DATABASE: stock_prediction_db
+      MYSQL_USER: ethan
+      MYSQL_PASSWORD: 040323
+      MYSQL_ROOT_PASSWORD: Front2Back!
+    volumes:
+      - stock_prediction_data:/var/lib/mysql
+    networks:
+      - backend_network
+    restart: always
+  FiNet:
+    build:
+      context: .
+      dockerfile: DockerFiles/Finet/Dockerfile
+    container_name: finet_app
+    ports:
+      - "8080:8080"
+    environment:
+      DB_USER_SESSION_HOST: user_session_db
+      DB_USER_SESSION_PORT: 3306
+      DB_USER_SESSION_USER: ethan
+      DB_USER_SESSION_PASSWORD: 040323
+      DB_USER_SESSION_NAME: user_session_db
+
+      DB_STOCK_PREDICTION_HOST: stock_prediction_db
+      DB_STOCK_PREDICTION_PORT: 3306
+      DB_STOCK_PREDICTION_USER: ethan
+      DB_STOCK_PREDICTION_PASSWORD: 040323
+      DB_STOCK_PREDICTION_NAME: stock_prediction_db
+    networks:
+    - backend_network
+    depends_on:
+      - user_session_db
+      - stock_prediction_db
+    restart: always
+
+volumes:
+user_session_data:
+stock_prediction_data:
+
+networks:
+  backend_network:
+    driver: bridge
