@@ -3,7 +3,6 @@
 #
 # Binaries for programs and plugins
 *.exe
-*.git
 *.exe~
 *.dll
 *.so
