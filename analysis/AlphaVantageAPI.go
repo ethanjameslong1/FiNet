@@ -133,7 +133,7 @@ func MakeWeeklyDataSlice(ctx context.Context, symbols []string) ([]*StockDataWee
 		if err != nil {
 			log.Printf("Error retrieving stock data for symbol %q: %v", s, err)
 			allErrors = append(allErrors, fmt.Errorf("symbol %q: %w", s, err))
-			if len(allErrors) > 8 {
+			if len(allErrors) > 3 {
 				return nil, fmt.Errorf("Too many failed API calls, check symbols list and API. atleast 9 failed API calls")
 			}
 			continue
