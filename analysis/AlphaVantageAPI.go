@@ -24,26 +24,6 @@ var httpClient = &http.Client{
 }
 
 // structs
-type StockDataWeekly struct {
-	MetaData struct {
-		Information   string `json:"1. Information"`
-		Symbol        string `json:"2. Symbol"`
-		LastRefreshed string `json:"3. Last Refreshed"`
-		TimeZone      string `json:"4. Time Zone"`
-	} `json:"Meta Data"`
-
-	TimeSeriesWeekly map[string]struct {
-		Open      string `json:"1. open"`
-		High      string `json:"2. high"`
-		Low       string `json:"3. low"`
-		Close     string `json:"4. close"`
-		AdjClose  string `json:"5. adjusted close"`
-		Volume    string `json:"6. volume"`
-		DivAmount string `json:"7. dividend amount"`
-	} `json:"Weekly Adjusted Time Series"`
-	ErrorMessage string `json:"Error Message"`
-	Note         string `json:"Note"`
-}
 
 type StockDataMonthly struct {
 	MetaData struct {
@@ -62,6 +42,27 @@ type StockDataMonthly struct {
 		Volume    string `json:"6. volume"`
 		DivAmount string `json:"7. dividend amount"`
 	} `json:"Monthly Adjusted Time Series"`
+	ErrorMessage string `json:"Error Message"`
+	Note         string `json:"Note"`
+}
+
+type StockDataWeekly struct {
+	MetaData struct {
+		Information   string `json:"1. Information"`
+		Symbol        string `json:"2. Symbol"`
+		LastRefreshed string `json:"3. Last Refreshed"`
+		TimeZone      string `json:"4. Time Zone"`
+	} `json:"Meta Data"`
+
+	TimeSeriesWeekly map[string]struct {
+		Open      string `json:"1. open"`
+		High      string `json:"2. high"`
+		Low       string `json:"3. low"`
+		Close     string `json:"4. close"`
+		AdjClose  string `json:"5. adjusted close"`
+		Volume    string `json:"6. volume"`
+		DivAmount string `json:"7. dividend amount"`
+	} `json:"Weekly Adjusted Time Series"`
 	ErrorMessage string `json:"Error Message"`
 	Note         string `json:"Note"`
 }

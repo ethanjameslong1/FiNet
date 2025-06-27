@@ -59,8 +59,8 @@ services:
     restart: always
 
 volumes:
-user_session_data:
-stock_prediction_data:
+ user_session_data:
+ stock_prediction_data:
 
 networks:
   backend_network:
