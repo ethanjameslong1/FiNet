@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS predictor_stocks (
 );
 
 CREATE TABLE IF NOT EXISTS predictable_stocks (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT (UUID()),
     stock_symbol VARCHAR(10) NOT NULL,
     predicted_slope DECIMAL(8, 6) NOT NULL,
     prediction_model_id INT, --if this could just somehow hold 1-3 id values that would solve my problem.
@@ -32,13 +32,14 @@ CREATE TABLE IF NOT EXISTS parameters (
 
 
 INSERT INTO parameters (parameter_name, description) VALUES
-('Open', 'The price at which a stock starts trading at the beginning of a trading day.'),
-('High', 'The highest price at which a stock traded during a trading day.'),
-('Low', 'The lowest price at which a stock traded during a trading day.'),
-('Close', 'The final price at which a stock trades at the end of a trading day.'),
-('AdjClose', 'The closing price of the stock after accounting for corporate actions like dividends or splits. It is often used for historical analysis as it reflects the true value of a stock.'),
-('Volume', 'The total number of shares of a stock that were traded during a trading day.'),
-('DivAmount', 'The amount of dividend paid per share of a stock.');
+('Open', 'The price at which a stock starts trading at the beginning of a trading day.'), -- 1
+('High', 'The highest price at which a stock traded during a trading day.'), -- 2
+('Low', 'The lowest price at which a stock traded during a trading day.'),-- 3
+('Close', 'The final price at which a stock trades at the end of a trading day.'),-- 4
+('AdjClose', 'The closing price of the stock after accounting for corporate actions like dividends or splits. It is often used for historical analysis as it reflects the true value of a stock.'),-- 5
+('Volume', 'The total number of shares of a stock that were traded during a trading day.'),-- 6
+('DivAmount', 'The amount of dividend paid per share of a stock.');-- 7
+
 
 CREATE TABLE IF NOT EXISTS prediction_models (
     id INT AUTO_INCREMENT PRIMARY KEY,
