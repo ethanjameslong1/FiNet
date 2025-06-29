@@ -32,10 +32,10 @@ services:
     networks:
       - backend_network
     restart: always
-  FiNet:
+  finet:
     build:
       context: .
-      dockerfile: DockerFiles/Finet/Dockerfile
+      dockerfile: dockerfiles/finet/Dockerfile
     container_name: finet_app
     ports:
       - "8080:8080"
