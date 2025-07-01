@@ -48,7 +48,7 @@ type User struct { // Renamed from Person to User
 
 const (
 	DriverName            string = "mysql"
-	UserSessionDataSource string = "ethan:040323@tcp(user_session_db:3306)/user_session_db/?parseTime=true"
+	UserSessionDataSource string = "ethan:040323@tcp(user_session_db:3306)/user_session_db?parseTime=true"
 	CONNECTIONS           int    = 50
 )
 
