@@ -1,6 +1,7 @@
 CREATE DATABASE IF NOT EXISTS stock_prediction_db;
 USE stock_prediction_db;
 CREATE USER IF NOT EXISTS 'ethan'@'%' IDENTIFIED BY '040323';
+GRANT ALL PRIVILEGES ON stock_prediction_db.* TO 'ethan'@'%';
 
 CREATE TABLE IF NOT EXISTS predictor_stocks (
     id UUID PRIMARY KEY DEFAULT (UUID()),
@@ -52,3 +53,4 @@ CREATE TABLE IF NOT EXISTS prediction_models (
 );
 INSERT INTO prediction_models (model_name, description) VALUES ("First Draft", "compares only 4 stocks, checks the predicted movements first and checks backwards to detect causes, likely bad")
 
+FLUSH PRIVILEGES;

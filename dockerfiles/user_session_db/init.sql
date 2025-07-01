@@ -1,6 +1,7 @@
 CREATE DATABASE IF NOT EXISTS user_session_db;
 USE user_session_db;
 CREATE USER IF NOT EXISTS 'ethan'@'%' IDENTIFIED BY '040323';
+GRANT ALL PRIVILEGES ON user_session_db.* TO 'ethan'@'%';
 -- init.sql
 -- Create the users table
 CREATE TABLE IF NOT EXISTS users (
@@ -23,3 +24,5 @@ CREATE TABLE IF NOT EXISTS sessions (
 -- Optional: Add some initial data for testing
 INSERT INTO users (username, password_hash, email) VALUES
 ('testuser', 'hashed_password_123', 'test@example.com');
+
+FLUSH PRIVILEGES;
