@@ -55,24 +55,32 @@ const (
 // NewDBService creates a DBService object pointer with a database connection.
 // It uses a context for the initial ping.
 func NewDBService(ctx context.Context, dataSourceName string) (*DBService, error) {
-	db, err := sql.Open(DriverName, dataSourceName)
-	if err != nil {
-		return nil, fmt.Errorf("error opening database connection for %s: %w", dataSourceName, err)
+	var db *sql.DB
+	var err error
+	maxRetries := 10
+	retryInt := 5 * time.Second
+	for i := range maxRetries {
+		db, err = sql.Open(DriverName, dataSourceName)
+		if err != nil {
+			log.Printf("Attempt %d: Error from sql.Open: %v. Retrying in %v...", i+1, err, retryInt)
+			time.Sleep(retryInt)
+			continue
+		}
+		err = db.PingContext(ctx)
+		if err != nil {
+			log.Printf("Attempt %d: Error pinging database: %v. Retrying in %v...", i+1, err, retryInt)
+			db.Close()
+			time.Sleep(retryInt)
+			continue
+		}
+
+		log.Printf("Connection established to database: %s\n", dataSourceName)
+		db.SetConnMaxLifetime(5 * time.Minute)
+		db.SetMaxOpenConns(CONNECTIONS)
+		db.SetMaxIdleConns(CONNECTIONS)
+
 	}
-
-	db.SetConnMaxLifetime(5 * time.Minute)
-	db.SetMaxOpenConns(CONNECTIONS)
-	db.SetMaxIdleConns(CONNECTIONS)
-
-	err = db.PingContext(ctx)
-	if err != nil {
-		db.Close() // Close connection if ping fails
-		return nil, fmt.Errorf("error pinging database %s: %w", dataSourceName, err)
-	}
-
-	fmt.Printf("Connection established to database: %s\n", dataSourceName)
-
-	return &DBService{db: db}, nil
+	return nil, fmt.Errorf("failed to connect to database after %d retries: %w", maxRetries, err)
 }
 
 // closes database connection associated with a Service Object
