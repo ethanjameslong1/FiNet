@@ -1,4 +1,5 @@
 CREATE DATABASE IF NOT EXISTS stock_prediction_db;
+USE stock_prediction_db;
 CREATE USER IF NOT EXISTS 'ethan'@'%' IDENTIFIED BY '040323';
 
 CREATE TABLE IF NOT EXISTS predictor_stocks (

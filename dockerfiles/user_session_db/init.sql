@@ -1,4 +1,5 @@
 CREATE DATABASE IF NOT EXISTS user_session_db;
+USE user_session_db;
 CREATE USER IF NOT EXISTS 'ethan'@'%' IDENTIFIED BY '040323';
 -- init.sql
 -- Create the users table
