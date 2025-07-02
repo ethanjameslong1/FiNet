@@ -57,12 +57,12 @@ func (s *DBService) GetUserByID(ctx context.Context, ID int) (User, error) {
 }
 
 // checks name and password and returns matching Person object
-func (s *DBService) AuthenticateUser(ctx context.Context, name string, password string) (User, error) {
+func (s *DBService) AuthenticateUser(ctx context.Context, name string, passwordHash string) (User, error) {
 	user, err := s.GetUserByName(ctx, name)
 	if err != nil {
 		return User{}, fmt.Errorf("Authentication failed: %w", err)
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(passwordHash))
 	if err != nil {
 		if err == bcrypt.ErrMismatchedHashAndPassword {
 			return User{}, fmt.Errorf("Authentication failed: %w", err)

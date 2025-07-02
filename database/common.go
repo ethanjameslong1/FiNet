@@ -57,20 +57,20 @@ const (
 func NewDBService(ctx context.Context, dataSourceName string) (*DBService, error) {
 	var db *sql.DB
 	var err error
-	maxRetries := 10
-	retryInt := 5 * time.Second
+	maxRetries := 7
+	retryInterval := 10 * time.Second
 	for i := range maxRetries {
 		db, err = sql.Open(DriverName, dataSourceName)
 		if err != nil {
-			log.Printf("Attempt %d: Error from sql.Open: %v. Retrying in %v...", i+1, err, retryInt)
-			time.Sleep(retryInt)
+			log.Printf("Attempt %d: Error from sql.Open: %v. Retrying in %v...", i+1, err, retryInterval)
+			time.Sleep(retryInterval)
 			continue
 		}
 		err = db.PingContext(ctx)
 		if err != nil {
-			log.Printf("Attempt %d: Error pinging database: %v. Retrying in %v...", i+1, err, retryInt)
+			log.Printf("Attempt %d: Error pinging database: %v. Retrying in %v...", i+1, err, retryInterval)
 			db.Close()
-			time.Sleep(retryInt)
+			time.Sleep(retryInterval)
 			continue
 		}
 
@@ -78,6 +78,7 @@ func NewDBService(ctx context.Context, dataSourceName string) (*DBService, error
 		db.SetConnMaxLifetime(5 * time.Minute)
 		db.SetMaxOpenConns(CONNECTIONS)
 		db.SetMaxIdleConns(CONNECTIONS)
+		return &DBService{db: db}, nil
 
 	}
 	return nil, fmt.Errorf("failed to connect to database after %d retries: %w", maxRetries, err)
