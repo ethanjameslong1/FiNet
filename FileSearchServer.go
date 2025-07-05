@@ -1,6 +1,5 @@
 // FileSearchServer.go
 
-
 //testing git authentication
 
 package main
@@ -51,11 +50,11 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RootHandler)))
 	mux.HandleFunc("POST /login", appHandler.LoginHandler)
-	mux.Handle("GET /adduser", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.ShowAddUser)))
-	mux.Handle("GET /stock", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.StockPageHandler)))
 	mux.HandleFunc("GET /login", appHandler.ShowLogin)
-	mux.HandleFunc("POST /adduser", appHandler.AddUser)
+	mux.Handle("GET /stock", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.StockRequestPageHandler)))
 	mux.Handle("POST /stock", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.StockRequestHandler)))
+	mux.HandleFunc("GET /register", appHandler.ShowRegistration)
+	mux.HandleFunc("POST /register", appHandler.RegistrationHandler)
 
 	fmt.Printf("port running on localhost:8080/\n")
 	if err := http.ListenAndServe(":8080", mux); err != nil {

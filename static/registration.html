@@ -4,10 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In to Search File Base</title>
+  <title>Register for File Base</title>
   <!-- Tailwind CSS CDN for styling -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    /* Custom styles to match the user's provided login form aesthetics */
     h3 {
       color: purple;
     }
@@ -20,15 +21,16 @@
 
 <body class="bg-gray-100 flex items-center justify-center min-h-screen font-sans">
   <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-    <form method="POST" action="/login" class="space-y-4">
-      <h3 class="text-2xl font-bold text-center mb-6">Sign In to Search File Base</h3>
+    <!-- Registration Form -->
+    <form method="POST" action="/register" class="space-y-4">
+      <h3 class="text-2xl font-bold text-center mb-6">Register for File Base</h3>
 
       <!-- Username Input -->
       <div>
-        <label for="username" class="block text-sm font-medium">User</label>
+        <label for="username" class="block text-sm font-medium">Username</label>
         <input type="text" id="username" name="username" value="" required
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-          placeholder="Enter your username">
+          placeholder="Enter your username" />
       </div>
 
       <!-- Password Input -->
@@ -36,20 +38,20 @@
         <label for="password" class="block text-sm font-medium">Password</label>
         <input type="password" id="password" name="password" value="" required
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-          placeholder="Enter your password">
+          placeholder="Enter your password" />
       </div>
 
       <!-- Submit Button -->
       <button type="submit"
         class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-150 ease-in-out">
-        Sign In
+        Register
       </button>
     </form>
 
-    <!-- Register User Link -->
+    <!-- Link to Login Page -->
     <p class="mt-6 text-center text-sm text-gray-600">
-      Don't have an account?
-      <a href="/register" class="font-medium text-purple-600 hover:text-purple-500">Register User</a>
+      Already have an account?
+      <a href="/login" class="font-medium text-purple-600 hover:text-purple-500">Sign In</a>
     </p>
   </div>
 </body>

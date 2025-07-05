@@ -17,7 +17,7 @@ type PageData struct {
 	Interval     string
 }
 
-func (h *Handler) StockPageHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) StockRequestPageHandler(w http.ResponseWriter, r *http.Request) {
 	user, ok := r.Context().Value(userContextKey).(database.User)
 	if !ok {
 		log.Printf("Error: User not found in context for StockHandler. Redirecting to login.")
@@ -29,7 +29,7 @@ func (h *Handler) StockPageHandler(w http.ResponseWriter, r *http.Request) {
 			Name: user.Username,
 		},
 		Error:    nil,
-		Interval: "Daily",
+		Interval: "Weekly",
 	}
 
 	tmpl, err := template.ParseFiles("static/stockAnalysisRequest.html")

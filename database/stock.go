@@ -10,5 +10,5 @@ import (
 )
 
 const (
-	StockDataSource string = "ethan:040323@tcp(stock_prediction_db:3306)/stock_prediction_db?parseTime=true"
+	StockDataSource string = "root:Front2Back!@tcp(stock_prediction_db:3306)/stock_prediction_db?parseTime=true"
 )

@@ -92,9 +92,8 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := http.Cookie{
-		Name:     "SessionCookie",
-		Value:    sessionID.String(),
-		Path:     "/",
+		Name:  "SessionCookie",
+		Value: sessionID.String(), Path: "/",
 		Expires:  time.Now().Add(h.SessionDuration),
 		HttpOnly: true,
 		Secure:   true,
@@ -115,4 +114,55 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
+}
+
+func (h *Handler) ShowRegistration(w http.ResponseWriter, r *http.Request) {
+
+	_, ok := r.Context().Value(userContextKey).(database.User)
+	if ok {
+		http.Redirect(w, r, "/stock", http.StatusSeeOther)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("static/registration.html")
+	if err != nil {
+		log.Printf("Error parsing registration template: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	err = tmpl.Execute(w, PageData{})
+	if err != nil {
+		log.Printf("Error executing registration template: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *Handler) RegistrationHandler(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		log.Printf("Error parsing form: %v", err)
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+
+	if username == "" || password == "" {
+		http.Error(w, "Username or password cannot be empty", http.StatusBadRequest)
+		return
+	}
+
+	succuess, err := h.UserSessionDBService.AddUser(r.Context(), username, password)
+	if err != nil || !succuess {
+		log.Printf("Register attempt failed for user '%s': %v", username, err)
+		http.Error(w, "Register failed due to a server error", http.StatusInternalServerError)
+		return
+	}
+	_, err = h.UserSessionDBService.GetUserByName(r.Context(), username)
+	if err != nil {
+		log.Printf("Error finding recently added user %s: %v", username, err)
+		http.Error(w, "Failed to find recently added user", http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
