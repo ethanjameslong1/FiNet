@@ -90,8 +90,8 @@ func AnalyzeWeeklyData(d []*StockDataWeekly, startDate string) error {
 
 				for s := range stockMap {
 					predictorData := stockMap[s].TimeSeriesWeekly[currentDate]
-					fmt.Printf("Checking %s for pattern behaviour", s)
-					fmt.Printf("PredictorData: %+v", predictorData)
+					log.Printf("Checking %s for pattern behaviour", s)
+					log.Printf("PredictorData: %+v", predictorData)
 				}
 
 			}

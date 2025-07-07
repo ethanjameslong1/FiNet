@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"text/template"
+	"time"
 
 	"github.com/ethanjameslong1/GoCloudProject.git/analysis"
 	"github.com/ethanjameslong1/GoCloudProject.git/database"
@@ -66,15 +66,13 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-	param := analysis.AlphaVantageParam{Function: "TIME_SERIES_WEEKLY_ADJUSTED", Symbol: "IBM", Datatype: "json", APIKey: analysis.ApiKey}
-	stockData, err := analysis.RetrieveStockDataWeekly(r.Context(), param)
-	// _, err = analysis.RetrieveStockDataWeekly(r.Context(), param)
+	dataSlice, err := analysis.MakeWeeklyDataSlice(r.Context(), analysis.AlphaVantageSymbols)
 	if err != nil {
-		log.Printf("Error retrieving stock data from API: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		log.Printf("Error creating data slice for analysis: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
 	}
-
-	fmt.Println(*stockData)
+	analysis.AnalyzeWeeklyData(dataSlice, time.Now().Truncate(24*time.Hour).Format("2006-01-02"))
 
 	err = tmpl.Execute(w, PageData{UserData: uData, StockWeights: sData, Error: nil})
 	if err != nil {
