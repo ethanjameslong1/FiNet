@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"text/template"
-	"time"
 
 	"github.com/ethanjameslong1/GoCloudProject.git/analysis"
 	"github.com/ethanjameslong1/GoCloudProject.git/database"
@@ -72,7 +71,7 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
-	analysis.AnalyzeWeeklyData(dataSlice, time.Now().Truncate(24*time.Hour).Format("2006-01-02"))
+	analysis.StoreWeeklyData(dataSlice, "", sData)
 
 	err = tmpl.Execute(w, PageData{UserData: uData, StockWeights: sData, Error: nil})
 	if err != nil {
