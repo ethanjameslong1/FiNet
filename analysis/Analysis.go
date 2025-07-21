@@ -3,11 +3,11 @@ package analysis
 import (
 	"errors"
 	"fmt"
+	"gonum.org/v1/gonum/stat"
 	"log"
 	"strconv"
 	"sync"
 	"time"
-	// "github.com/google/uuid"
 )
 
 // Test Values
@@ -20,14 +20,14 @@ const (
 )
 
 type RelationshipData struct {
-	predictableSym        string
-	predictorSym          string
-	predictableCloseDelta float64
-	predictorCloseDelta   float64
+	PredictableSym        string
+	PredictorSym          string
+	PredictableCloseDelta float64
+	PredictorCloseDelta   float64
 }
 type RelationshipKey struct {
-	predictorSym   string
-	predictableSym string
+	PredictorSym   string
+	PredictableSym string
 }
 type RelationshipPackage struct {
 	Key  RelationshipKey
@@ -35,7 +35,7 @@ type RelationshipPackage struct {
 }
 
 // Creates a hashmap of relationalData, returns the map and an error (if any)
-func StoreWeeklyData(d []*StockDataWeekly, startDate string, weights StockWeights) (map[RelationshipKey][]RelationshipData, error) {
+func StoreWeeklyDataV1(d []*StockDataWeekly, startDate string, weights StockWeights) (map[RelationshipKey][]RelationshipData, error) {
 	//populating map for faster access to stock data
 	symbolDataMap := make(map[string]*StockDataWeekly)
 	for _, data := range d {
@@ -45,15 +45,19 @@ func StoreWeeklyData(d []*StockDataWeekly, startDate string, weights StockWeight
 	var mapMutex sync.Mutex
 
 	var wg sync.WaitGroup
+	var collectorwg sync.WaitGroup
 	ch := make(chan RelationshipPackage)
 
+	collectorwg.Add(1)
 	//COLLECTOR FUNC *********************************************************************
 	go func(ch <-chan RelationshipPackage) {
+		defer collectorwg.Done()
+
 		for pkg := range ch {
 			mapMutex.Lock()
 			relationshipMap[pkg.Key] = append(relationshipMap[pkg.Key], pkg.Data)
 			mapMutex.Unlock()
-			fmt.Printf("Collector recieved relationship: %+v", pkg)
+			fmt.Printf("Collector recieved relationship: %+v\n", pkg)
 		}
 		fmt.Println("Collector: Channel closed, no more relationships to process.")
 	}(ch)
@@ -103,14 +107,12 @@ func StoreWeeklyData(d []*StockDataWeekly, startDate string, weights StockWeight
 
 				laterPredictableData, ok := stockMap[sym].TimeSeriesWeekly[laterDate]
 				if !ok {
-					log.Printf("Missing later data for %s on %s", sym, laterDate)
 					currentDate = olderDate
 					continue
 				}
 
 				olderPredictableData, ok := stockMap[sym].TimeSeriesWeekly[olderDate]
 				if !ok {
-					log.Printf("Missing older data for %s on %s", sym, currentDate)
 					currentDate = olderDate
 					continue
 				}
@@ -138,7 +140,10 @@ func StoreWeeklyData(d []*StockDataWeekly, startDate string, weights StockWeight
 				}
 
 				for s := range stockMap {
-					laterPredictorData := stockMap[s].TimeSeriesWeekly[olderDate]
+					laterPredictorData, ok := stockMap[s].TimeSeriesWeekly[olderDate]
+					if !ok {
+						continue
+					}
 					laterPredictorClose, err := strconv.ParseFloat(laterPredictorData.Close, 64)
 					if err != nil {
 						log.Printf("Error parsing later close price (%s) for %s on %s: %v", laterPredictorData.Close, s, laterDate, err)
@@ -158,7 +163,6 @@ func StoreWeeklyData(d []*StockDataWeekly, startDate string, weights StockWeight
 
 					olderPredictorData, ok := stockMap[s].TimeSeriesWeekly[tempOldDate]
 					if !ok {
-						log.Printf("Missing older data for %s on %s", s, tempOldDate)
 						currentDate = olderDate
 						continue
 					}
@@ -178,14 +182,14 @@ func StoreWeeklyData(d []*StockDataWeekly, startDate string, weights StockWeight
 					}
 
 					key := RelationshipKey{
-						predictorSym:   s,
-						predictableSym: sym,
+						PredictorSym:   s,
+						PredictableSym: sym,
 					}
 					data := RelationshipData{
-						predictorSym:          s,
-						predictableSym:        sym,
-						predictableCloseDelta: deltaPredictable,
-						predictorCloseDelta:   deltaPredictorClose,
+						PredictorSym:          s,
+						PredictableSym:        sym,
+						PredictableCloseDelta: deltaPredictable,
+						PredictorCloseDelta:   deltaPredictorClose,
 					}
 
 					newPackage := RelationshipPackage{
@@ -203,6 +207,7 @@ func StoreWeeklyData(d []*StockDataWeekly, startDate string, weights StockWeight
 
 	wg.Wait()
 	close(ch)
+	collectorwg.Wait()
 
 	return relationshipMap, nil
 }
@@ -246,4 +251,27 @@ func findPriorFriday(startDate string) (string, error) {
 	return recentFriday, nil
 }
 
-func analyzeStoredData(map[RelationshipKey][]RelationshipData, w StockWeights)
+func AnalyzeStoredDataV1(data map[RelationshipKey][]RelationshipData) error {
+	fmt.Println("--- Correlation Analysis ---")
+	for key, relationshipDataSlice := range data {
+		var predictorDeltas []float64
+		var predictableDeltas []float64
+
+		for _, dataPoint := range relationshipDataSlice {
+			predictorDeltas = append(predictorDeltas, dataPoint.PredictorCloseDelta)
+			predictableDeltas = append(predictableDeltas, dataPoint.PredictableCloseDelta)
+		}
+
+		if len(predictorDeltas) < 2 {
+			fmt.Printf("Not enough data to calculate correlation for %s and %s.\n", key.PredictorSym, key.PredictableSym)
+			continue
+		}
+
+		correlation := stat.Correlation(predictorDeltas, predictableDeltas, nil)
+
+		// Print the result for the current pair.
+		fmt.Printf("Correlation between %s (predictor) and %s (predictable): %.4f\n", key.PredictorSym, key.PredictableSym, correlation)
+	}
+	fmt.Println("--------------------------")
+	return nil
+}

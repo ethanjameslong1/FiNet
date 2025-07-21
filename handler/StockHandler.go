@@ -71,8 +71,12 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
-	analysis.StoreWeeklyData(dataSlice, "", sData)
-
+	DataMap, err := analysis.StoreWeeklyDataV1(dataSlice, "", sData)
+	if err != nil {
+		log.Printf("Error colelcting weekly stock data: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
+	analysis.AnalyzeStoredDataV1(DataMap)
 	err = tmpl.Execute(w, PageData{UserData: uData, StockWeights: sData, Error: nil})
 	if err != nil {
 		log.Printf("Error executing login template: %v", err)

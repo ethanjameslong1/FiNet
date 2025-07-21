@@ -1,19 +1,25 @@
-package analysis
+package analysis_test
 
 import (
+	"bytes"
+	"github.com/ethanjameslong1/GoCloudProject.git/analysis"
+	"io"
+	"log"
 	"math"
+	"os"
+	"strings"
 	"testing"
 )
 
 // TestStoreWeeklyData tests the main data collection and processing logic.
 // It verifies that relationships are calculated correctly and that the function
 // can gracefully handle gaps in the time-series data (e.g., market holidays).
-func TestStoreWeeklyData(t *testing.T) {
+func TestStoreWeeklyDataV1(t *testing.T) {
 	// --- Mock Data Setup ---
 	// This simulates the data you would get from an API call.
 	// Note the gap: data for "2025-06-13" is intentionally missing for TESTA
 	// to ensure the error handling for data gaps is working correctly.
-	mockWeeklyData := []*StockDataWeekly{
+	mockWeeklyData := []*analysis.StockDataWeekly{
 		{
 			MetaData: struct {
 				Information   string `json:"1. Information"`
@@ -61,7 +67,7 @@ func TestStoreWeeklyData(t *testing.T) {
 	}
 
 	// --- Test Execution ---
-	relationshipMap, err := StoreWeeklyData(mockWeeklyData, "2025-06-27", StockWeights{})
+	relationshipMap, err := analysis.StoreWeeklyDataV1(mockWeeklyData, "2025-06-27", analysis.StockWeights{})
 	if err != nil {
 		t.Fatalf("StoreWeeklyData returned an unexpected error: %v", err)
 	}
@@ -73,9 +79,9 @@ func TestStoreWeeklyData(t *testing.T) {
 
 	// Check the relationship where TESTA is predictable and TESTB is the predictor.
 	// This is the first valid data point the function should find.
-	key := RelationshipKey{
-		predictorSym:   "TESTB",
-		predictableSym: "TESTA",
+	key := analysis.RelationshipKey{
+		PredictorSym:   "TESTB",
+		PredictableSym: "TESTA",
 	}
 
 	dataSlice, ok := relationshipMap[key]
@@ -102,11 +108,95 @@ func TestStoreWeeklyData(t *testing.T) {
 	expectedPredictorDelta := (525.00 - 510.00) / 510.00
 
 	// Assert that the calculated deltas match the expected values.
-	if math.Abs(foundData.predictableCloseDelta-expectedPredictableDelta) > tolerance {
-		t.Errorf("For key %+v, expected predictable delta %f, but got %f", key, expectedPredictableDelta, foundData.predictableCloseDelta)
+	if math.Abs(foundData.PredictableCloseDelta-expectedPredictableDelta) > tolerance {
+		t.Errorf("For key %+v, expected predictable delta %f, but got %f", key, expectedPredictableDelta, foundData.PredictableCloseDelta)
 	}
 
-	if math.Abs(foundData.predictorCloseDelta-expectedPredictorDelta) > tolerance {
-		t.Errorf("For key %+v, expected predictor delta %f, but got %f", key, expectedPredictorDelta, foundData.predictorCloseDelta)
+	if math.Abs(foundData.PredictorCloseDelta-expectedPredictorDelta) > tolerance {
+		t.Errorf("For key %+v, expected predictor delta %f, but got %f", key, expectedPredictorDelta, foundData.PredictorCloseDelta)
+	}
+}
+
+func TestAnalyzeStoredDataV1(t *testing.T) {
+	// --- Test Cases ---
+	testCases := []struct {
+		name           string
+		inputData      map[analysis.RelationshipKey][]analysis.RelationshipData
+		expectedOutput string // A substring we expect to find in the printed output
+		expectError    bool
+	}{
+		{
+			name: "Perfect Positive Correlation",
+			inputData: map[analysis.RelationshipKey][]analysis.RelationshipData{
+				{PredictorSym: "P_POS", PredictableSym: "S_POS"}: {
+					{PredictorCloseDelta: 0.1, PredictableCloseDelta: 0.2},
+					{PredictorCloseDelta: 0.2, PredictableCloseDelta: 0.4},
+					{PredictorCloseDelta: 0.3, PredictableCloseDelta: 0.6},
+				},
+			},
+			expectedOutput: "Correlation between P_POS (predictor) and S_POS (predictable): 1.0000",
+			expectError:    false,
+		},
+		{
+			name: "Perfect Negative Correlation",
+			inputData: map[analysis.RelationshipKey][]analysis.RelationshipData{
+				{PredictorSym: "P_NEG", PredictableSym: "S_NEG"}: {
+					{PredictorCloseDelta: 0.1, PredictableCloseDelta: -0.1},
+					{PredictorCloseDelta: 0.2, PredictableCloseDelta: -0.2},
+					{PredictorCloseDelta: 0.3, PredictableCloseDelta: -0.3},
+				},
+			},
+			expectedOutput: "Correlation between P_NEG (predictor) and S_NEG (predictable): -1.0000",
+			expectError:    false,
+		},
+		{
+			name: "Not Enough Data For Correlation",
+			inputData: map[analysis.RelationshipKey][]analysis.RelationshipData{
+				{PredictorSym: "P_FEW", PredictableSym: "S_FEW"}: {
+					{PredictorCloseDelta: 0.1, PredictableCloseDelta: 0.2},
+				},
+			},
+			expectedOutput: "Not enough data to calculate correlation for P_FEW and S_FEW.",
+			expectError:    false,
+		},
+		{
+			name:           "Empty Input Map",
+			inputData:      map[analysis.RelationshipKey][]analysis.RelationshipData{},
+			expectedOutput: "--- Correlation Analysis ---", // Should just print the header and footer
+			expectError:    false,
+		},
+	}
+
+	// --- Test Execution ---
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Redirect stdout to capture the function's printed output
+			originalStdout := os.Stdout
+			r, w, _ := os.Pipe()
+			os.Stdout = w
+			// This also redirects any `log` statements that print to stdout
+			log.SetOutput(w)
+
+			// Execute the function
+			err := analysis.AnalyzeStoredDataV1(tc.inputData)
+
+			// Restore stdout and close the pipe
+			w.Close()
+			os.Stdout = originalStdout
+			log.SetOutput(os.Stderr) // Restore default logger output
+
+			var buf bytes.Buffer
+			io.Copy(&buf, r)
+			capturedOutput := buf.String()
+
+			// --- Assertions ---
+			if (err != nil) != tc.expectError {
+				t.Fatalf("Expected error state '%v', but got: %v", tc.expectError, err)
+			}
+
+			if !strings.Contains(capturedOutput, tc.expectedOutput) {
+				t.Errorf("Expected output to contain:\n'%s'\n\nGot:\n'%s'", tc.expectedOutput, capturedOutput)
+			}
+		})
 	}
 }
