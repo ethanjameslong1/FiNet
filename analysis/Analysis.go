@@ -33,6 +33,11 @@ type RelationshipPackage struct {
 	Key  RelationshipKey
 	Data RelationshipData
 }
+type Prediction struct {
+	PredictableSym string
+	PredictorSym   string
+	Correlation    float64
+}
 
 // Creates a hashmap of relationalData, returns the map and an error (if any)
 func StoreWeeklyDataV1(d []*StockDataWeekly, startDate string, weights StockWeights) (map[RelationshipKey][]RelationshipData, error) {
@@ -251,8 +256,10 @@ func findPriorFriday(startDate string) (string, error) {
 	return recentFriday, nil
 }
 
-func AnalyzeStoredDataV1(data map[RelationshipKey][]RelationshipData) error {
+func AnalyzeStoredDataV1(data map[RelationshipKey][]RelationshipData) (Prediction, error) {
 	fmt.Println("--- Correlation Analysis ---")
+	var pSym1, pSym2 string
+	var c float64
 	for key, relationshipDataSlice := range data {
 		var predictorDeltas []float64
 		var predictableDeltas []float64
@@ -271,7 +278,8 @@ func AnalyzeStoredDataV1(data map[RelationshipKey][]RelationshipData) error {
 
 		// Print the result for the current pair.
 		fmt.Printf("Correlation between %s (predictor) and %s (predictable): %.4f\n", key.PredictorSym, key.PredictableSym, correlation)
+		pSym1, pSym2, c = key.PredictableSym, key.PredictorSym, correlation
 	}
 	fmt.Println("--------------------------")
-	return nil
+	return Prediction{PredictableSym: pSym1, PredictorSym: pSym2, Correlation: c}, nil
 }

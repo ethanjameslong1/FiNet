@@ -14,6 +14,7 @@ type PageData struct {
 	Error        error
 	StockWeights analysis.StockWeights
 	Interval     string
+	Predictions  []database.Prediction
 }
 
 func (h *Handler) StockRequestPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +77,12 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error colelcting weekly stock data: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
-	analysis.AnalyzeStoredDataV1(DataMap)
+	Pred, err := analysis.AnalyzeStoredDataV1(DataMap)
+	if err != nil {
+		log.Printf("Error analyzing stored stock data: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
+	h.StockDBService.AddPrediction(r.Context(), Pred.PredictableSym, Pred.PredictorSym, Pred.Correlation)
 	err = tmpl.Execute(w, PageData{UserData: uData, StockWeights: sData, Error: nil})
 	if err != nil {
 		log.Printf("Error executing login template: %v", err)
@@ -84,4 +90,29 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func (h *Handler) ShowPredictionsHandler(w http.ResponseWriter, r *http.Request) {
+	predictions, err := h.StockDBService.GetAllPredictions(r.Context())
+	if err != nil {
+		log.Printf("Error fetching predictions: %v", err)
+		http.Error(w, "Could not retrieve predictions.", http.StatusInternalServerError)
+		return
+	}
+	data := PageData{
+		Predictions: predictions,
+	}
+	tmpl, err := template.ParseFiles("static/show_predictions.html")
+	if err != nil {
+		log.Printf("Error parsing show_predictions template: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		log.Printf("Error executing show_predictions template: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 }

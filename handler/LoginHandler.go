@@ -23,15 +23,21 @@ type UserLoginData struct {
 
 type Handler struct {
 	UserSessionDBService *database.DBService
+	StockDBService       *database.DBService
 	SessionDuration      time.Duration
 }
 
-func NewHandler(UserSessionDB *database.DBService, sessionDuration time.Duration) (*Handler, error) {
+func NewHandler(UserSessionDB *database.DBService, StockDB *database.DBService, sessionDuration time.Duration) (*Handler, error) {
 	if UserSessionDB == nil {
 		return nil, errors.New("database services cannot be nil")
 	}
+	if StockDB == nil {
+		return nil, errors.New("database services cannot be nil")
+	}
+
 	return &Handler{
 		UserSessionDBService: UserSessionDB,
+		StockDBService:       StockDB,
 		SessionDuration:      sessionDuration,
 	}, nil
 }

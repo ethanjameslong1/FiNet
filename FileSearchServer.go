@@ -17,11 +17,16 @@ import (
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	serv, err := database.NewDBService(ctx, database.UserSessionDataSource)
+	servUSDB, err := database.NewDBService(ctx, database.UserSessionDataSource)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer serv.Close()
+	defer servUSDB.Close()
+	servStockDB, err := database.NewDBService(ctx, database.StockDataSource)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer servStockDB.Close()
 
 	go func() {
 		ticker := time.NewTicker(1 * time.Hour) // Clean up every hour
@@ -32,7 +37,7 @@ func main() {
 				log.Println("Session cleanup goroutine stopping.")
 				return
 			case <-ticker.C:
-				rowsAffected, err := serv.DeleteExpiredSessions(ctx)
+				rowsAffected, err := servUSDB.DeleteExpiredSessions(ctx)
 				if err != nil {
 					log.Printf("Error during session cleanup: %v", err)
 				} else {
@@ -41,8 +46,9 @@ func main() {
 			}
 		}
 	}()
+
 	sessionLifetime := 24 * time.Hour
-	appHandler, err := handler.NewHandler(serv, sessionLifetime)
+	appHandler, err := handler.NewHandler(servUSDB, servStockDB, sessionLifetime)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,6 +61,7 @@ func main() {
 	mux.Handle("POST /stock", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.StockRequestHandler)))
 	mux.HandleFunc("GET /register", appHandler.ShowRegistration)
 	mux.HandleFunc("POST /register", appHandler.RegistrationHandler)
+	mux.Handle("GET /predictions", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.ShowPredictionsHandler)))
 
 	fmt.Printf("port running on localhost:8080/\n")
 	if err := http.ListenAndServe(":8080", mux); err != nil {
