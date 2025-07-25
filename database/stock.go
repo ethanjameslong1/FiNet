@@ -8,9 +8,10 @@ import (
 )
 
 const (
-	StockDataSource            string = "root:Front2Back!@tcp(stock_prediction_db:3306)/stock_prediction_db?parseTime=true"
-	SQL_INSERT_PREDICTION      string = `INSERT INTO predictions (predictable_symbol, predictor_symbol, correlation) VALUES (?, ?, ?)`
-	SQL_SELECT_ALL_PREDICTIONS string = `SELECT id, predictable_symbol, predictor_symbol, correlation FROM prediction`
+	StockDataSource             string = "root:Front2Back!@tcp(stock_prediction_db:3306)/stock_prediction_db?parseTime=true"
+	SQL_INSERT_PREDICTION       string = `INSERT INTO prediction (predictable_symbol, predictor_symbol, correlation, prediction_model) VALUES (?, ?, ?, ?)`
+	SQL_SELECT_ALL_PREDICTIONS  string = `SELECT id, predictable_symbol, predictor_symbol, correlation, prediction_model FROM prediction`
+	SQL_SELECT_PREDICTION_MODEL string = `SELECT id FROM prediction_models WHERE model_name = ?`
 )
 
 type Prediction struct {
@@ -18,10 +19,18 @@ type Prediction struct {
 	PredictableSymbol string  `json:"predictable_symbol"`
 	PredictorSymbol   string  `json:"predictor_symbol"`
 	Correlation       float64 `json:"correlation"`
+	ModelID           int     `json:"prediction_model"`
 }
 
-func (s *DBService) AddPrediction(ctx context.Context, predictableSym string, predictorSym string, cor float64) error {
-	r, err := s.db.ExecContext(ctx, SQL_INSERT_PREDICTION, predictableSym, predictorSym, cor)
+func (s *DBService) AddPrediction(ctx context.Context, predictableSym string, predictorSym string, cor float64, model string) error {
+	modelR := s.db.QueryRowContext(ctx, SQL_SELECT_PREDICTION_MODEL, model)
+	var modelID int
+	err := modelR.Scan(&modelID)
+	if err != nil {
+		return fmt.Errorf("Error finding prediction model: %w", err)
+	}
+
+	r, err := s.db.ExecContext(ctx, SQL_INSERT_PREDICTION, predictableSym, predictorSym, cor, modelID)
 	if err != nil {
 		return fmt.Errorf("Error inserting Prediction: %w", err)
 	}
@@ -45,7 +54,7 @@ func (s *DBService) GetAllPredictions(ctx context.Context) ([]Prediction, error)
 	var predictions []Prediction
 	for rows.Next() {
 		var p Prediction
-		if err := rows.Scan(&p.ID, &p.PredictableSymbol, &p.PredictorSymbol, &p.Correlation); err != nil {
+		if err := rows.Scan(&p.ID, &p.PredictableSymbol, &p.PredictorSymbol, &p.Correlation, &p.ModelID); err != nil {
 			return nil, fmt.Errorf("error scanning prediction row: %w", err)
 		}
 		predictions = append(predictions, p)

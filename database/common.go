@@ -50,9 +50,8 @@ const (
 func NewDBService(ctx context.Context, dataSourceName string) (*DBService, error) {
 	var db *sql.DB
 	var err error
-	maxRetries := 3
-	retryInterval := 30 * time.Second
-	time.Sleep(retryInterval * 8)
+	maxRetries := 20
+	retryInterval := 20 * time.Second
 	for i := range maxRetries {
 		db, err = sql.Open(DriverName, dataSourceName)
 		if err != nil {

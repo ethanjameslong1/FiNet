@@ -106,20 +106,8 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	}
 	http.SetCookie(w, &cookie)
+	http.Redirect(w, r, "/stock", http.StatusSeeOther)
 
-	tmpl, err := template.ParseFiles("static/stockAnalysisRequest.html")
-	if err != nil {
-		log.Printf("Error parsing stock template after login: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	err = tmpl.Execute(w, PageData{UserData: UserLoginData{Name: user.Username}, Error: nil}) // Use user.Username
-	if err != nil {
-		log.Printf("Error executing stock template after login: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
 }
 
 func (h *Handler) ShowRegistration(w http.ResponseWriter, r *http.Request) {

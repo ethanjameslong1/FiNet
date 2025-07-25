@@ -147,6 +147,7 @@ func StoreWeeklyDataV1(d []*StockDataWeekly, startDate string, weights StockWeig
 				for s := range stockMap {
 					laterPredictorData, ok := stockMap[s].TimeSeriesWeekly[olderDate]
 					if !ok {
+						currentDate = olderDate
 						continue
 					}
 					laterPredictorClose, err := strconv.ParseFloat(laterPredictorData.Close, 64)
@@ -202,12 +203,11 @@ func StoreWeeklyDataV1(d []*StockDataWeekly, startDate string, weights StockWeig
 						Data: data,
 					}
 					currentDate = olderDate
-
 					ch <- newPackage
 				}
 
 			}
-		}(ch, sym, symbolDataMap, OriginalFriday, 1)
+		}(ch, sym, symbolDataMap, OriginalFriday, lookBackTimeYear)
 	}
 
 	wg.Wait()
@@ -256,10 +256,11 @@ func findPriorFriday(startDate string) (string, error) {
 	return recentFriday, nil
 }
 
-func AnalyzeStoredDataV1(data map[RelationshipKey][]RelationshipData) (Prediction, error) {
+func AnalyzeStoredDataV1(data map[RelationshipKey][]RelationshipData) ([]Prediction, error) {
 	fmt.Println("--- Correlation Analysis ---")
 	var pSym1, pSym2 string
 	var c float64
+	var PredictionSlice []Prediction
 	for key, relationshipDataSlice := range data {
 		var predictorDeltas []float64
 		var predictableDeltas []float64
@@ -279,7 +280,9 @@ func AnalyzeStoredDataV1(data map[RelationshipKey][]RelationshipData) (Predictio
 		// Print the result for the current pair.
 		fmt.Printf("Correlation between %s (predictor) and %s (predictable): %.4f\n", key.PredictorSym, key.PredictableSym, correlation)
 		pSym1, pSym2, c = key.PredictableSym, key.PredictorSym, correlation
+		PredictionSlice = append(PredictionSlice, Prediction{PredictableSym: pSym1, PredictorSym: pSym2, Correlation: c})
+
 	}
 	fmt.Println("--------------------------")
-	return Prediction{PredictableSym: pSym1, PredictorSym: pSym2, Correlation: c}, nil
+	return PredictionSlice, nil
 }

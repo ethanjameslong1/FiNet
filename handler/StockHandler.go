@@ -72,6 +72,7 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
+
 	DataMap, err := analysis.StoreWeeklyDataV1(dataSlice, "", sData)
 	if err != nil {
 		log.Printf("Error colelcting weekly stock data: %v", err)
@@ -82,7 +83,10 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error analyzing stored stock data: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
-	h.StockDBService.AddPrediction(r.Context(), Pred.PredictableSym, Pred.PredictorSym, Pred.Correlation)
+	for _, prediction := range Pred {
+		log.Printf("AddPrediction begin called with %s (predictable), %s (predictor) and %f (correlation)", prediction.PredictableSym, prediction.PredictorSym, prediction.Correlation)
+		h.StockDBService.AddPrediction(r.Context(), prediction.PredictableSym, prediction.PredictorSym, prediction.Correlation, "First Draft")
+	}
 	err = tmpl.Execute(w, PageData{UserData: uData, StockWeights: sData, Error: nil})
 	if err != nil {
 		log.Printf("Error executing login template: %v", err)

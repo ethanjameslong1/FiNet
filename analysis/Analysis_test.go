@@ -178,7 +178,7 @@ func TestAnalyzeStoredDataV1(t *testing.T) {
 			log.SetOutput(w)
 
 			// Execute the function
-			err := analysis.AnalyzeStoredDataV1(tc.inputData)
+			_, err := analysis.AnalyzeStoredDataV1(tc.inputData)
 
 			// Restore stdout and close the pipe
 			w.Close()

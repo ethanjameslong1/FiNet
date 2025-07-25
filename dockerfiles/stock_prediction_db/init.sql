@@ -15,8 +15,10 @@ CREATE TABLE IF NOT EXISTS prediction (
     id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
     predictable_symbol VARCHAR(10) NOT NULL,
     predictor_symbol VARCHAR(10) NOT NULL,
-    correlation DECIMAL(10,7) NOT NULL
-); -- TODO add a prediction_models reference to show the model used to get the prediction
+    correlation DECIMAL(10,7) NOT NULL,
+    prediction_model INT NOT NULL,
+    FOREIGN KEY (prediction_model) REFERENCES prediction_models(id) ON DELETE CASCADE
+);
 
 -- CREATE TABLE IF NOT EXISTS predictable_stocks (
 --     id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
