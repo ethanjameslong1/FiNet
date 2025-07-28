@@ -50,7 +50,7 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 	user, ok := r.Context().Value(userContextKey).(database.User)
 	if !ok {
 		log.Printf("Error: User not found in context for StockHandler. Redirecting to login.")
-		http.Redirect(w, r, "/login", http.StatusFound) // StatusFound (302) is common for redirection
+		http.Redirect(w, r, "/login", http.StatusNotFound)
 		return
 	}
 	uData := UserLoginData{Name: user.Username}
@@ -59,21 +59,27 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
-	sData := analysis.StockWeights{OpenPriceWeight: r.FormValue("weightCurrentOpen"), HighPriceWeight: r.FormValue("weightCurrentHigh"), ClosePriceWeight: r.FormValue("weightCurrentClose"), LowPriceWeight: r.FormValue("weightCurrentLow"), VolumeWeight: r.FormValue("weightCurrentVolume"), PercChangeWeight: r.FormValue("weightCloseOpenPctChange"), PercRangeWeight: r.FormValue("weightHighLowPctRange")}
+	err := r.ParseForm()
+	if err != nil {
+		log.Printf("error parsing form: %v", err)
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+	symbolList := r.PostForm["stocks"]
 	tmpl, err := template.ParseFiles("static/stockAnalysisRequestComplete.html")
 	if err != nil {
 		log.Printf("Error parsing login template: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-	dataSlice, err := analysis.MakeWeeklyDataSlice(r.Context(), analysis.AlphaVantageSymbols)
+	dataSlice, err := analysis.MakeWeeklyDataSlice(r.Context(), symbolList)
 	if err != nil {
 		log.Printf("Error creating data slice for analysis: %v", err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 
-	DataMap, err := analysis.StoreWeeklyDataV1(dataSlice, "", sData)
+	DataMap, err := analysis.StoreWeeklyDataV1(dataSlice, "")
 	if err != nil {
 		log.Printf("Error colelcting weekly stock data: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -83,11 +89,12 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error analyzing stored stock data: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
+
 	for _, prediction := range Pred {
 		log.Printf("AddPrediction begin called with %s (predictable), %s (predictor) and %f (correlation)", prediction.PredictableSym, prediction.PredictorSym, prediction.Correlation)
-		h.StockDBService.AddPrediction(r.Context(), prediction.PredictableSym, prediction.PredictorSym, prediction.Correlation, "First Draft")
+		h.StockDBService.AddPrediction(r.Context(), prediction.PredictableSym, prediction.PredictorSym, prediction.Correlation, "First Draft", user.ID)
 	}
-	err = tmpl.Execute(w, PageData{UserData: uData, StockWeights: sData, Error: nil})
+	err = tmpl.Execute(w, PageData{UserData: uData, Error: nil})
 	if err != nil {
 		log.Printf("Error executing login template: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -97,7 +104,14 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ShowPredictionsHandler(w http.ResponseWriter, r *http.Request) {
-	predictions, err := h.StockDBService.GetAllPredictions(r.Context())
+	user, ok := r.Context().Value(userContextKey).(database.User)
+	if !ok {
+		log.Printf("Error: User not found in context for StockHandler. Redirecting to login.")
+		http.Redirect(w, r, "/login", http.StatusNotFound)
+		return
+	}
+
+	predictions, err := h.StockDBService.GetAllPredictionsForUser(r.Context(), user.ID)
 	if err != nil {
 		log.Printf("Error fetching predictions: %v", err)
 		http.Error(w, "Could not retrieve predictions.", http.StatusInternalServerError)

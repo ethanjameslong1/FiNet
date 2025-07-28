@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS prediction (
     predictor_symbol VARCHAR(10) NOT NULL,
     correlation DECIMAL(10,7) NOT NULL,
     prediction_model INT NOT NULL,
+    user_id INT NOT NULL,
     FOREIGN KEY (prediction_model) REFERENCES prediction_models(id) ON DELETE CASCADE
 );
 
