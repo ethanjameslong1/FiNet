@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o /app/finet-server ./FileSearchServer.go
+RUN go build -o /app/finet-server ./main.go
 
 EXPOSE 8080
 
