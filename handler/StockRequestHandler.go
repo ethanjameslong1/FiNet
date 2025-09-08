@@ -46,6 +46,7 @@ func (h *Handler) StockRequestPageHandler(w http.ResponseWriter, r *http.Request
 	}
 }
 
+// i need to decouple this bad.
 func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 	user, ok := r.Context().Value(userContextKey).(database.User)
 	if !ok {
@@ -66,12 +67,18 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	symbolList := r.PostForm["stocks"]
+
+	//TODO add new place for this to route to, somewhere to look at raw data, maybe just add a user main page that can route to all of these individually would be smart.
+
 	tmpl, err := template.ParseFiles("static/stockAnalysisRequestComplete.html")
 	if err != nil {
 		log.Printf("Error parsing login template: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
+
+	//TODO from here I need to move this analysis logic elsewhere.
+
 	dataSlice, err := analysis.MakeWeeklyDataSlice(r.Context(), symbolList)
 	if err != nil {
 		log.Printf("Error creating data slice for analysis: %v", err)
@@ -94,6 +101,9 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("AddPrediction begin called with %s (predictable), %s (predictor) and %f (correlation)", prediction.PredictableSym, prediction.PredictorSym, prediction.Correlation)
 		h.StockDBService.AddPrediction(r.Context(), prediction.PredictableSym, prediction.PredictorSym, prediction.Correlation, "First Draft", user.ID)
 	}
+
+	//TODO here the analysis logic is complete.
+
 	err = tmpl.Execute(w, PageData{UserData: uData, Error: nil})
 	if err != nil {
 		log.Printf("Error executing login template: %v", err)
