@@ -40,8 +40,7 @@ type Prediction struct {
 }
 
 // Creates a hashmap of relationalData, returns the map and an error (if any)
-func StoreWeeklyDataV1(d []*StockDataWeekly, startDate string) (map[RelationshipKey][]RelationshipData, error) {
-	//populating map for faster access to stock data
+func StoreWeeklyDataV1(d []*StockDataWeekly, startDate string, lookBackTime int) (map[RelationshipKey][]RelationshipData, error) {
 	symbolDataMap := make(map[string]*StockDataWeekly)
 	for _, data := range d {
 		symbolDataMap[data.MetaData.Symbol] = data

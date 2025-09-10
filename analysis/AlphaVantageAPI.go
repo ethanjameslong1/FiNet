@@ -24,7 +24,6 @@ var httpClient = &http.Client{
 }
 
 // structs
-
 type StockDataMonthly struct {
 	MetaData struct {
 		Information   string `json:"1. Information"`

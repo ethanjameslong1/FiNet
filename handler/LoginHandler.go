@@ -106,7 +106,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	}
 	http.SetCookie(w, &cookie)
-	http.Redirect(w, r, "/stock", http.StatusSeeOther)
+	http.Redirect(w, r, "/homepage", http.StatusSeeOther)
 
 }
 
