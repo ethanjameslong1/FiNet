@@ -59,17 +59,19 @@
             </tr>
           </thead>
           <tbody>
-            {{range .StockData}}
+            {{range .Data}}
+            {{range $date, $values := .TimeSeriesWeekly}}
             <tr class="bg-white border-b hover:bg-gray-50">
               <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                {{.Date}}
+                {{$date}}
               </th>
-              <td class="px-6 py-4">{{.Open}}</td>
-              <td class="px-6 py-4">{{.High}}</td>
-              <td class="px-6 py-4">{{.Low}}</td>
-              <td class="px-6 py-4">{{.Close}}</td>
-              <td class="px-6 py-4">{{.Volume}}</td>
+              <td class="px-6 py-4">{{$values.Open}}</td>
+              <td class="px-6 py-4">{{$values.High}}</td>
+              <td class="px-6 py-4">{{$values.Low}}</td>
+              <td class="px-6 py-4">{{$values.Close}}</td>
+              <td class="px-6 py-4">{{$values.Volume}}</td>
             </tr>
+            {{end}}
             {{end}}
           </tbody>
         </table>

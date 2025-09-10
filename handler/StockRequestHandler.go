@@ -17,9 +17,9 @@ type PageData struct {
 	Predictions  []database.Prediction
 }
 type rawAnalysisData struct {
-	symbol string
-	period string
-	data   []analysis.StockDataWeekly
+	Symbol string
+	Period string
+	Data   []*analysis.StockDataWeekly
 }
 
 func (h *Handler) StockRequestPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -91,7 +91,7 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	DataMap, err := analysis.StoreWeeklyDataV1(dataSlice, "")
+	DataMap, err := analysis.StoreWeeklyDataV1(dataSlice, "", 1)
 	if err != nil {
 		log.Printf("Error colelcting weekly stock data: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -180,13 +180,12 @@ func (h *Handler) RawDataRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) RawDataHandler(w http.ResponseWriter, r *http.Request) {
-	user, ok := r.Context().Value(userContextKey).(database.User)
+	_, ok := r.Context().Value(userContextKey).(database.User)
 	if !ok {
 		log.Printf("Error: User not found in context for StockHandler. Redirecting to login.")
 		http.Redirect(w, r, "/login", http.StatusNotFound)
 		return
 	}
-	uData := UserLoginData{Name: user.Username}
 	if err := r.ParseForm(); err != nil {
 		log.Printf("Error parsing form: %v", err)
 		http.Error(w, "Bad request", http.StatusBadRequest)
@@ -201,8 +200,8 @@ func (h *Handler) RawDataHandler(w http.ResponseWriter, r *http.Request) {
 	symbol := r.PostForm["stockSymbol"]
 	period := r.PostForm["period"]
 	pageData := rawAnalysisData{
-		symbol: symbol[0],
-		period: period[0],
+		Symbol: symbol[0],
+		Period: period[0],
 	}
 
 	tmpl, err := template.ParseFiles("static/showRawAnalysis.html")
@@ -218,24 +217,7 @@ func (h *Handler) RawDataHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
-
-	DataMap, err := analysis.StoreWeeklyDataV1(dataSlice, "", int(period[0])) //TODO start here when finishing rawdatadisplay function
-	if err != nil {
-		log.Printf("Error colelcting weekly stock data: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-	}
-	Pred, err := analysis.AnalyzeStoredDataV1(DataMap)
-	if err != nil {
-		log.Printf("Error analyzing stored stock data: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-	}
-
-	for _, prediction := range Pred {
-		log.Printf("AddPrediction begin called with %s (predictable), %s (predictor) and %f (correlation)", prediction.PredictableSym, prediction.PredictorSym, prediction.Correlation)
-		h.StockDBService.AddPrediction(r.Context(), prediction.PredictableSym, prediction.PredictorSym, prediction.Correlation, "First Draft", user.ID)
-	}
-
-	//TODO here the analysis logic is complete.
+	pageData.Data = dataSlice
 
 	err = tmpl.Execute(w, pageData)
 	if err != nil {

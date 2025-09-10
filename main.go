@@ -63,8 +63,8 @@ func main() {
 	mux.HandleFunc("GET /register", appHandler.ShowRegistration)
 	mux.HandleFunc("POST /register", appHandler.RegistrationHandler)
 	mux.Handle("GET /predictions", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.ShowPredictionsHandler)))
-	mux.Handle("GET /rawdatarequest", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RawDataRequest)))
-	mux.Handle("POST /rawdataview", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RawDataHandler)))
+	mux.Handle("GET /rawdata", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RawDataRequest)))
+	mux.Handle("POST /rawdata", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RawDataHandler)))
 	mux.HandleFunc("GET /logout", appHandler.LogoutHandler)
 
 	fmt.Printf("port running on localhost:8080/\n")
