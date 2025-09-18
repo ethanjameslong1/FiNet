@@ -3,7 +3,7 @@ package handler
 import (
 	"database/sql"
 	"errors"
-	"github.com/ethanjameslong1/GoCloudProject.git/database"
+	"github.com/ethanjameslong1/FiNet/database"
 	"github.com/google/uuid"
 	"log"
 	"net/http"

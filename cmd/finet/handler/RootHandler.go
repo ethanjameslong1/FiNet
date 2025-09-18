@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/ethanjameslong1/GoCloudProject.git/database"
+	"github.com/ethanjameslong1/FiNet/database"
 )
 
 func (h *Handler) RootHandler(w http.ResponseWriter, r *http.Request) {

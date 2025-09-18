@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/ethanjameslong1/GoCloudProject.git/analysis"
-	"github.com/ethanjameslong1/GoCloudProject.git/database"
+	"github.com/ethanjameslong1/FiNet/analysis"
+	"github.com/ethanjameslong1/FiNet/database"
 )
 
 type PageData struct {

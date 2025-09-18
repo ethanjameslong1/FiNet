@@ -7,8 +7,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/ethanjameslong1/GoCloudProject.git/database"
-	"github.com/ethanjameslong1/GoCloudProject.git/handler"
+	"github.com/ethanjameslong1/FiNet/database"
+	"github.com/ethanjameslong1/FiNet/handler"
 	"log"
 	"net/http"
 	"time"

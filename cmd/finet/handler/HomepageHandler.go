@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/ethanjameslong1/GoCloudProject.git/database"
+	"github.com/ethanjameslong1/FiNet/database"
 	"log"
 	"net/http"
 	"text/template"

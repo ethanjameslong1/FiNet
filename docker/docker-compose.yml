@@ -28,7 +28,7 @@ services:
   finet:
     build:
       context: ..
-      dockerfile: ./docker/dockerfile/Dockerfile
+      dockerfile: ./docker/dockerfile/finetDockerfile
     container_name: finet_app
     ports:
       - "8080:8080"
@@ -37,6 +37,25 @@ services:
       DB_USER_SESSION_PORT: 3306
       DB_USER_SESSION_NAME: user_session_db
 
+      DB_STOCK_PREDICTION_HOST: stock_prediction_db
+      DB_STOCK_PREDICTION_PORT: 3306
+      DB_STOCK_PREDICTION_NAME: stock_prediction_db
+    networks:
+    - backend_network
+    depends_on:
+      user_session_db:
+        condition: service_started
+      stock_prediction_db:
+        condition: service_started
+    restart: always
+  stock:
+    build:
+      context: ..
+      dockerfile: ./docker/dockerfile/stockDockerfile
+    container_name: stock_analysis
+    ports:
+      - "6969:6969"
+    environment:
       DB_STOCK_PREDICTION_HOST: stock_prediction_db
       DB_STOCK_PREDICTION_PORT: 3306
       DB_STOCK_PREDICTION_NAME: stock_prediction_db
