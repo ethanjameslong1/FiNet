@@ -27,8 +27,8 @@ services:
     restart: always
   finet:
     build:
-      context: ..
-      dockerfile: ./docker/dockerfile/finetDockerfile
+      context: ../cmd/finet/do
+      dockerfile: ./dockerfile/finetDockerfile
     container_name: finet_app
     ports:
       - "8080:8080"
@@ -50,8 +50,8 @@ services:
     restart: always
   stock:
     build:
-      context: ..
-      dockerfile: ./docker/dockerfile/stockDockerfile
+      context: ../cmd/stock/
+      dockerfile: ./dockerfile/stockDockerfile
     container_name: stock_analysis
     ports:
       - "6969:6969"
