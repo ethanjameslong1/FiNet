@@ -41,7 +41,7 @@ services:
       DB_STOCK_PREDICTION_PORT: 3306
       DB_STOCK_PREDICTION_NAME: stock_prediction_db
     networks:
-    - backend_network
+      - backend_network
     depends_on:
       user_session_db:
         condition: service_started
@@ -50,8 +50,8 @@ services:
     restart: always
 
 volumes:
- user_session_data:
- stock_prediction_data:
+  user_session_data:
+  stock_prediction_data:
 
 networks:
   backend_network:
