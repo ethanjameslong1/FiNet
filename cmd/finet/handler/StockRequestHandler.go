@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/ethanjameslong1/FiNet/analysis"
+	"github.com/ethanjameslong1/FiNet/cmd/stock/analysis"
 	"github.com/ethanjameslong1/FiNet/database"
 )
 

@@ -7,8 +7,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/ethanjameslong1/FiNet/database"
-	"github.com/ethanjameslong1/FiNet/handler"
+	"github.com/ethanjameslong1/FiNet/cmd/finet/handler"
+	"github.com/ethanjameslong1/FiNet/database/database"
 	"log"
 	"net/http"
 	"time"
