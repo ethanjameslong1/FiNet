@@ -2,7 +2,7 @@ package analysis_test
 
 import (
 	"bytes"
-	"github.com/ethanjameslong1/GoCloudProject.git/analysis"
+	"github.com/ethanjameslong1/FiNet/cmd/stock/analysis"
 	"io"
 	"log"
 	"math"

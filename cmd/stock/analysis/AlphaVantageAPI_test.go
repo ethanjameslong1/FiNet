@@ -3,7 +3,7 @@ package analysis_test
 import (
 	"context"
 	"encoding/json"
-	"github.com/ethanjameslong1/GoCloudProject.git/analysis"
+	"github.com/ethanjameslong1/FiNet/cmd/stock/analysis"
 	"testing"
 	"time"
 )

@@ -8,7 +8,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ethanjameslong1/FiNet/cmd/finet/handler"
-	"github.com/ethanjameslong1/FiNet/database/database"
+	"github.com/ethanjameslong1/FiNet/database"
 	"log"
 	"net/http"
 	"time"
