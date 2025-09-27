@@ -1,0 +1,40 @@
+package analysis
+
+import (
+	"log"
+	"sort"
+	"strconv"
+)
+
+func ExtractMonthlyAdjClosePrices(data []*StockDataMonthly) map[string][]float64 {
+	adjClosePrices := make(map[string][]float64) // Map of stock symbol to slice of close prices
+
+	// Iterate over each stock's data
+	for _, stock := range data {
+		if len(stock.TimeSeriesMonthly) == 0 {
+			continue
+		}
+
+		// Extract and sort the dates to ensure chronological order
+		var dates []string
+		for date := range stock.TimeSeriesMonthly {
+			dates = append(dates, date)
+		}
+		sort.Strings(dates)
+
+		// Collect close prices in chronological order
+		var prices []float64
+		for _, date := range dates {
+			closeStr := stock.TimeSeriesMonthly[date].AdjClose
+			closeVal, err := strconv.ParseFloat(closeStr, 64)
+			if err != nil {
+				log.Printf("Error parsing close price for %s on %s: %v", stock.MetaData.Symbol, date, err)
+				continue
+			}
+			prices = append(prices, closeVal) // Append to prices slice
+		}
+		adjClosePrices[stock.MetaData.Symbol] = prices // Store in map
+	}		
+
+	return adjClosePrices
+}
