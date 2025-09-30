@@ -25,10 +25,11 @@ services:
     networks:
       - backend_network
     restart: always
+
   finet:
     build:
-      context: ../cmd/finet/do
-      dockerfile: ./dockerfile/finetDockerfile
+      context: ..
+      dockerfile: ./cmd/finet/dockerfile/finetDockerfile
     container_name: finet_app
     ports:
       - "8080:8080"
@@ -48,10 +49,11 @@ services:
       stock_prediction_db:
         condition: service_started
     restart: always
+
   stock:
     build:
-      context: ../cmd/stock/
-      dockerfile: ./dockerfile/stockDockerfile
+      context: ..
+      dockerfile: ./cmd/stock/dockerfile/stockDockerfile
     container_name: stock_analysis
     ports:
       - "6969:6969"
@@ -66,7 +68,6 @@ services:
         condition: service_started
       stock_prediction_db:
         condition: service_started
-    restart: always
 
 volumes:
  user_session_data:
