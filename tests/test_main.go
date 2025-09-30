@@ -494,7 +494,7 @@ func TestMain() {
 	fmt.Println()
 }
 
-// func main() {
-// 	fmt.Println("=== Running 20-Stock Test Workflow ===")
-// 	TestMain()
-// }
+func main() {
+	fmt.Println("=== Running 20-Stock Test Workflow ===")
+	TestMain()
+}
