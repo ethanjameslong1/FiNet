@@ -49,6 +49,22 @@ services:
         condition: service_started
     restart: always
 
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: ./dockerfile
+    container_name: finet_frontend
+    ports:
+      - "3000:80"
+    environment:
+      VITE_API_URL: http://finet_app:8080
+    networks:
+      - backend_network
+    depends_on:
+      finet:
+        condition: service_started
+    restart: always
+
 volumes:
   user_session_data:
   stock_prediction_data:
