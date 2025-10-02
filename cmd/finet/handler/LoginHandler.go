@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"bytes"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"github.com/ethanjameslong1/FiNet/database"
 	"github.com/google/uuid"
@@ -26,6 +28,69 @@ type Handler struct {
 	StockDBService       *database.DBService
 	SessionDuration      time.Duration
 }
+
+// TEST FUNCTIONS *****************************************************************************
+func (h *Handler) TESTAPISTOCK(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("static/AAAstockAPITest.html")
+	if err != nil {
+		log.Printf("Error parsing login template: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	err = tmpl.Execute(w, PageData{})
+	if err != nil {
+		log.Printf("Error executing login template: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+}
+
+type testItem struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+var stockAPIURL = "http://stock_analysis:6969/item"
+
+func (h *Handler) TESTAPISTOCKhandle(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	var newItem testItem
+	err := json.NewDecoder(r.Body).Decode(&newItem)
+	if err != nil {
+		http.Error(w, "Invalid body", http.StatusBadRequest)
+		return
+	}
+	log.Printf("Success frontend received ID=%d, Name=%s. Sending to stock.go", newItem.ID, newItem.Name)
+
+	jsonData, err := json.Marshal(newItem)
+	if err != nil {
+		http.Error(w, "Failed to prepare data for stock API call", http.StatusInternalServerError)
+		return
+	}
+	req, err := http.NewRequest("POST", stockAPIURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		http.Error(w, "Failed to create request for stock API", http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		http.Error(w, "failed to reach the stock API", http.StatusServiceUnavailable)
+		return
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusCreated {
+		log.Printf("STock API returned an error: %s", resp.Status)
+		http.Error(w, "Stock API failed to process the item", resp.StatusCode)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte("Successfully created item in stock service."))
+	log.Println("Successfully forwarded item to stock API.")
+}
+
+// TEST FUNCTIONS *****************************************************************************
 
 func NewHandler(UserSessionDB *database.DBService, StockDB *database.DBService, sessionDuration time.Duration) (*Handler, error) {
 	if UserSessionDB == nil {

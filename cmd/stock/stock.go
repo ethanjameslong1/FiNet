@@ -1,21 +1,14 @@
 package main
 
 import (
-	"net/http"
-
+	"github.com/ethanjameslong1/FiNet/cmd/stock/handler"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	r := gin.Default()
+	router := gin.Default()
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
+	router.POST("/item", handler.ReceiveAPIcall)
 
-	// Start server on port 8080 (default)
-	// Server will listen on 0.0.0.0:8080 (localhost:8080 on Windows)
-	r.Run()
+	router.Run(":6969")
 }

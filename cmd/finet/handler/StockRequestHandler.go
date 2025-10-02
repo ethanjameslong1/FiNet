@@ -1,20 +1,22 @@
 package handler
 
 import (
+	"bytes"
+	"encoding/json"
+	"github.com/ethanjameslong1/FiNet/cmd/stock/analysis"
+	"github.com/ethanjameslong1/FiNet/database"
 	"log"
 	"net/http"
 	"text/template"
-
-	"github.com/ethanjameslong1/FiNet/cmd/stock/analysis"
-	"github.com/ethanjameslong1/FiNet/database"
+	"time"
 )
 
 type PageData struct {
 	UserData     UserLoginData
 	Error        error
-	StockWeights analysis.StockWeights
+	StockWeights analysis.StockWeights //remove
 	Interval     string
-	Predictions  []database.Prediction
+	Predictions  []database.Prediction //remove
 }
 type rawAnalysisData struct {
 	Symbol string
@@ -73,8 +75,6 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	symbolList := r.PostForm["stocks"]
 
-	//TODO add new place for this to route to, somewhere to look at raw data, maybe just add a user main page that can route to all of these individually would be smart.
-
 	tmpl, err := template.ParseFiles("static/stockAnalysisRequestComplete.html")
 	if err != nil {
 		log.Printf("Error parsing login template: %v", err)
@@ -82,32 +82,33 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//TODO from here I need to move this analysis logic elsewhere.
-
-	dataSlice, err := analysis.MakeWeeklyDataSlice(r.Context(), symbolList)
+	// START API TO BACKEND STOCK ANALYSIS
+	jsonData, err := json.Marshal(symbolList)
 	if err != nil {
-		log.Printf("Error creating data slice for analysis: %v", err)
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+		http.Error(w, "Failed to prepare data for stock API call", http.StatusInternalServerError)
 		return
 	}
-
-	DataMap, err := analysis.StoreWeeklyDataV1(dataSlice, "", 1)
+	stockAPIURL := "http://stock_analysis:6969/item" //TODO put this somewhere
+	req, err := http.NewRequest("POST", stockAPIURL, bytes.NewBuffer(jsonData))
 	if err != nil {
-		log.Printf("Error colelcting weekly stock data: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		http.Error(w, "Failed to create request for stock API", http.StatusInternalServerError)
+		return
 	}
-	Pred, err := analysis.AnalyzeStoredDataV1(DataMap)
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
 	if err != nil {
-		log.Printf("Error analyzing stored stock data: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		http.Error(w, "failed to reach the stock API", http.StatusServiceUnavailable)
+		return
 	}
-
-	for _, prediction := range Pred {
-		log.Printf("AddPrediction begin called with %s (predictable), %s (predictor) and %f (correlation)", prediction.PredictableSym, prediction.PredictorSym, prediction.Correlation)
-		h.StockDBService.AddPrediction(r.Context(), prediction.PredictableSym, prediction.PredictorSym, prediction.Correlation, "First Draft", user.ID)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusCreated {
+		log.Printf("Stock API returned an error: %s", resp.Status)
+		http.Error(w, "Stock API failed to process the item", resp.StatusCode)
+		return
 	}
-
-	//TODO here the analysis logic is complete.
+	log.Println("Successfully forwarded item to stock API.")
+	//END API BACKEND CALL
 
 	err = tmpl.Execute(w, PageData{UserData: uData, Error: nil})
 	if err != nil {

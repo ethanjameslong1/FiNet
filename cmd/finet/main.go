@@ -66,6 +66,8 @@ func main() {
 	mux.Handle("GET /rawdata", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RawDataRequest)))
 	mux.Handle("POST /rawdata", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RawDataHandler)))
 	mux.HandleFunc("GET /logout", appHandler.LogoutHandler)
+	mux.HandleFunc("GET /testapi", appHandler.TESTAPISTOCK)
+	mux.HandleFunc("POST /itemtest", appHandler.TESTAPISTOCKhandle)
 
 	fmt.Printf("port running on localhost:8080/\n")
 	if err := http.ListenAndServe(":8080", mux); err != nil {
