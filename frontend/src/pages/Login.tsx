@@ -5,10 +5,10 @@ export function TestApi() {
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
-    fetch("/api/test")
-      .then((response) => response.json())
+    fetch(`${import.meta.env.VITE_API_URL}/test`)
+      .then((res) => res.json())
       .then((data) => setMsg(data.message))
-      .catch((error) => console.error("Error fetching API:", error));
+      .catch((err) => console.error(err));
   }, []);
 
   return <div>Backend Says: {msg} </div>;
