@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
-import { Button } from "./Button";
-import { SPACING } from "../constants/global";
+import Logout from "../pages/Logout";
 
 interface NavbarProps {
   username?: string; // optional display name
@@ -10,7 +9,7 @@ const Navbar = ({ username }: NavbarProps) => {
   return (
     <header className="shadow-md bg-white dark:bg-gray-800">
       <nav
-        className={`container mx-auto flex justify-between items-center px-${SPACING.large} py-${SPACING.medium}`}
+        className={`container mx-auto flex justify-between items-center px-4 py-4`}
       >
         <Link
           to="/home"
@@ -25,9 +24,7 @@ const Navbar = ({ username }: NavbarProps) => {
               Hello, {username}
             </span>
           )}
-          <Button to="/logout" fullWidth={false}>
-            Logout
-          </Button>
+          <Logout />
         </div>
       </nav>
     </header>

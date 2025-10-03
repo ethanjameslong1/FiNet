@@ -1,46 +1,36 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
-
-export function TestApi() {
-  const [msg, setMsg] = useState("");
-
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/test`)
-      .then((res) => res.json())
-      .then((data) => setMsg(data.message))
-      .catch((err) => console.error(err));
-  }, []);
-
-  return <div>Backend Says: {msg} </div>;
-}
+import { Button } from "../components/Button";
 
 const LoginPage = () => {
   return (
-    <div className="bg-gray-100 flex items-center justify-center min-h-screen font-sans">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-        <div>
-          <TestApi />
-        </div>
-        <form method="POST" action="/login" className="space-y-4">
-          <h3 className="text-2xl font-bold text-center mb-6 text-purple-700">
-            Sign In to Search File Base
-          </h3>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 font-sans">
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-md">
+        {/* Header */}
+        <h3 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-gray-100">
+          Sign In
+        </h3>
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mb-8">
+          Welcome back! Please enter your credentials.
+        </p>
 
+        {/* Login Form */}
+        <form method="POST" action="/login" className="space-y-5">
           {/* Username Input */}
           <div>
             <label
               htmlFor="username"
-              className="block text-sm font-medium text-green-600"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              User
+              Username
             </label>
             <input
               type="text"
               id="username"
               name="username"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
-                         focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 
+                         rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                         focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               placeholder="Enter your username"
             />
           </div>
@@ -49,7 +39,7 @@ const LoginPage = () => {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-green-600"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Password
             </label>
@@ -58,29 +48,25 @@ const LoginPage = () => {
               id="password"
               name="password"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
-                         focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 
+                         rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                         focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               placeholder="Enter your password"
             />
           </div>
 
           {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm 
-                       text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 
-                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 
-                       transition duration-150 ease-in-out"
-          >
-            Sign In
-          </button>
+          <Button type="submit">Sign In</Button>
         </form>
 
-        {/* Register User Link */}
-        <p className="mt-6 text-center text-sm text-gray-600">
+        {/* Register Link */}
+        <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
           Don&apos;t have an account?{" "}
-          <Link to="/register" className="text-purple-600 hover:underline">
-            Register User
+          <Link
+            to="/register"
+            className="text-blue-600 hover:underline dark:text-blue-400"
+          >
+            Register
           </Link>
         </p>
       </div>
