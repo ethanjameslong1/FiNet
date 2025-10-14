@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"github.com/ethanjameslong1/FiNet/cmd/stock/handler"
 	"github.com/ethanjameslong1/FiNet/database"
 	"github.com/gin-gonic/gin"
