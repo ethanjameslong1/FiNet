@@ -9,7 +9,7 @@ COPY cmd/stock/ .
 
 RUN go build -o ./stock-server ./stock.go
 
-EXPOSE 6969
+EXPOSE 9090
 
 CMD ["./stock-server"]
 

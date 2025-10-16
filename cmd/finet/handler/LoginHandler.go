@@ -50,7 +50,7 @@ type testItem struct {
 	Name string `json:"name"`
 }
 
-var stockAPIURL = "http://stock_analysis:6969/item"
+var stockAPIURL = "http://stock_analysis:9090/item"
 
 func (h *Handler) TESTAPISTOCKhandle(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -111,7 +111,7 @@ func (h *Handler) ShowLogin(w http.ResponseWriter, r *http.Request) {
 
 	_, ok := r.Context().Value(userContextKey).(database.User)
 	if ok {
-		http.Redirect(w, r, "/stock", http.StatusSeeOther)
+		http.Redirect(w, r, "/finet/stock", http.StatusSeeOther)
 		return
 	}
 
@@ -164,14 +164,14 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	cookie := http.Cookie{
 		Name:  "SessionCookie",
-		Value: sessionID.String(), Path: "/",
+		Value: sessionID.String(), Path: "/finet/",
 		Expires:  time.Now().Add(h.SessionDuration),
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
 	}
 	http.SetCookie(w, &cookie)
-	http.Redirect(w, r, "/homepage", http.StatusSeeOther)
+	http.Redirect(w, r, "/finet/homepage", http.StatusSeeOther)
 
 }
 
@@ -179,7 +179,7 @@ func (h *Handler) ShowRegistration(w http.ResponseWriter, r *http.Request) {
 
 	_, ok := r.Context().Value(userContextKey).(database.User)
 	if ok {
-		http.Redirect(w, r, "/stock", http.StatusSeeOther)
+		http.Redirect(w, r, "/finet/stock", http.StatusSeeOther)
 		return
 	}
 
@@ -223,5 +223,5 @@ func (h *Handler) RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to find recently added user", http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	http.Redirect(w, r, "/finet/login", http.StatusSeeOther)
 }

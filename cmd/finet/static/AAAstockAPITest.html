@@ -19,7 +19,7 @@
     <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md">
         <h1 class="text-3xl font-bold mb-2 text-center text-cyan-400">Send Item to Stock API</h1>
         <p class="text-center text-gray-400 mb-6">Enter an ID and Name to send a POST request to your Go backend running
-            on port 6969.</p>
+            on port 9090.</p>
 
         <!-- Form to send data -->
         <form id="itemForm" class="space-y-6">
@@ -80,7 +80,7 @@
             try {
                 // Send the POST request to your Go service
                 // This assumes you are running this page on your local machine
-                // and the docker container port 6969 is mapped to your localhost.
+                // and the docker container port 9090 is mapped to your localhost.
                 const response = await fetch('/itemtest', {
                     method: 'POST',
                     headers: {
@@ -102,7 +102,7 @@
 
             } catch (error) {
                 console.error('Error sending item:', error);
-                errorData.textContent = error.message + '\n\nCould not connect to the API. Is your docker-compose running and the port 6969 exposed?';
+                errorData.textContent = error.message + '\n\nCould not connect to the API. Is your docker-compose running and the port 9090 exposed?';
                 errorDiv.classList.remove('hidden');
             }
         });

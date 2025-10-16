@@ -14,6 +14,7 @@ const Portfolio = () => {
   });
 
   //API fetch for portfolio data here
+  //TODO Figure out how the forms work
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 font-sans">
       <Navbar />

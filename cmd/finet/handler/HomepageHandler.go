@@ -11,7 +11,7 @@ func (h *Handler) HomepageHandler(w http.ResponseWriter, r *http.Request) {
 	user, ok := r.Context().Value(userContextKey).(database.User)
 	if !ok {
 		log.Printf("Error: User not found in context for StockHandler. Redirecting to login.")
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/finet/", http.StatusFound)
 		return
 	}
 	data := PageData{

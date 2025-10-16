@@ -29,7 +29,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	router.POST("/item", stockHandler.ReceiveAPIcall)
+	//TEST this is just to see if the 2 containers can communicate, the function is in requestHandler.go. In ../finet/main.go there is more info
+	router.POST("/analysis/item", stockHandler.ReceiveAPIcall)
 
-	router.Run(":6969")
+	router.Run(":9090")
 }

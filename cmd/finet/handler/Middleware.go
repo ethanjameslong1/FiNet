@@ -17,7 +17,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 				http.Error(w, "Bad Request", http.StatusBadRequest)
 				return
 			}
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, "/finet/login", http.StatusFound)
 			return
 		}
 
@@ -28,13 +28,13 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 			http.SetCookie(w, &http.Cookie{
 				Name:     "SessionCookie",
 				Value:    "",
-				Path:     "/",
+				Path:     "/finet/",
 				Expires:  time.Unix(0, 0),
 				HttpOnly: true,
 				Secure:   true,
 				SameSite: http.SameSiteLaxMode,
 			})
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, "/finet/login", http.StatusFound)
 			return
 		}
 
@@ -52,22 +52,22 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 			http.SetCookie(w, &http.Cookie{
 				Name:     "SessionCookie",
 				Value:    "",
-				Path:     "/",
+				Path:     "/finet/",
 				Expires:  time.Unix(0, 0),
 				HttpOnly: true,
 				Secure:   true,
 				SameSite: http.SameSiteLaxMode,
 			})
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, "/finet/login", http.StatusFound)
 			return
 		}
 
 		user, userErr := h.UserSessionDBService.GetUserByID(r.Context(), session.UserID)
 		if userErr != nil {
 			log.Printf("AuthMiddleware: Failed to get user details for user ID '%d': %v", session.UserID, userErr)
-			http.SetCookie(w, &http.Cookie{Name: "SessionCookie", Value: "", Path: "/", Expires: time.Unix(0, 0), HttpOnly: true, Secure: true, SameSite: http.SameSiteLaxMode})
+			http.SetCookie(w, &http.Cookie{Name: "SessionCookie", Value: "", Path: "/finet/", Expires: time.Unix(0, 0), HttpOnly: true, Secure: true, SameSite: http.SameSiteLaxMode})
 			http.Error(w, "Authentication error", http.StatusInternalServerError)
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, "/finet/login", http.StatusFound)
 			return
 		}
 

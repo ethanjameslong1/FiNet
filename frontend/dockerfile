@@ -1,17 +1,19 @@
-# Stage 1: Use Nginx
-FROM nginx:alpine
+FROM node:20-alpine AS builder
+WORKDIR /app
 
-# Remove default config
-RUN rm /etc/nginx/conf.d/default.conf
+COPY package*.json ./
+RUN npm install
 
-# Copy custom Nginx config
-COPY nginx.conf /etc/nginx/conf.d/
+COPY . .
 
-# Copy frontend build files
-COPY dist/ /usr/share/nginx/html
+RUN npm run build
 
-# Expose HTTP port
+FROM nginx:1.25-alpine
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY --from=builder app/dist /usr/share/nginx/html
+
 EXPOSE 80
 
-# Start Nginx in foreground
 CMD ["nginx", "-g", "daemon off;"]
