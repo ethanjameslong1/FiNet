@@ -31,6 +31,8 @@ services:
       context: ..
       dockerfile: ./cmd/finet/dockerfile/finetDockerfile
     container_name: finet_app
+    expose:
+      - "8000"
     environment:
       DB_USER_SESSION_HOST: user_session_db
       DB_USER_SESSION_PORT: 3306
@@ -67,6 +69,8 @@ services:
       context: ..
       dockerfile: ./cmd/stock/dockerfile/stockDockerfile
     container_name: stock_analysis
+    expose:
+      - "8001"
     environment:
       DB_STOCK_PREDICTION_HOST: stock_prediction_db
       DB_STOCK_PREDICTION_PORT: 3306

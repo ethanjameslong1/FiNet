@@ -54,25 +54,25 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.Handle("/finet/", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RootHandler)))
-	mux.HandleFunc("POST /finet/login", appHandler.LoginHandler)
-	mux.HandleFunc("GET /finet/login", appHandler.ShowLogin)
-	mux.Handle("GET /finet/homepage", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.HomepageHandler)))
-	mux.Handle("GET /finet/stock", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.StockRequestPageHandler)))
-	mux.Handle("POST /finet/stock", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.StockRequestHandler)))
-	mux.HandleFunc("GET /finet/register", appHandler.ShowRegistration)
-	mux.HandleFunc("POST /finet/register", appHandler.RegistrationHandler)
-	mux.Handle("GET /finet/predictions", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.ShowPredictionsHandler)))
-	mux.Handle("GET /finet/rawdata", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RawDataRequest)))
-	mux.Handle("POST /finet/rawdata", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RawDataHandler)))
-	mux.HandleFunc("GET /finet/logout", appHandler.LogoutHandler)
+	mux.Handle("/", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RootHandler)))
+	mux.HandleFunc("POST /login", appHandler.LoginHandler)
+	mux.HandleFunc("GET /login", appHandler.ShowLogin)
+	mux.Handle("GET /homepage", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.HomepageHandler)))
+	mux.Handle("GET /stock", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.StockRequestPageHandler)))
+	mux.Handle("POST /stock", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.StockRequestHandler)))
+	mux.HandleFunc("GET /register", appHandler.ShowRegistration)
+	mux.HandleFunc("POST /register", appHandler.RegistrationHandler)
+	mux.Handle("GET /predictions", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.ShowPredictionsHandler)))
+	mux.Handle("GET /rawdata", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RawDataRequest)))
+	mux.Handle("POST /rawdata", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RawDataHandler)))
+	mux.HandleFunc("GET /logout", appHandler.LogoutHandler)
 
 	//TEST this is just to ensure that once nginx is in place we can properly move analysis logic over. Functions are in loginhandler.go, just change the struct there to test whatever
-	mux.HandleFunc("GET /finet/testapi", appHandler.TESTAPISTOCK)
-	mux.HandleFunc("POST /finet/itemtest", appHandler.TESTAPISTOCKhandle)
+	mux.HandleFunc("GET /testapi", appHandler.TESTAPISTOCK)
+	mux.HandleFunc("POST /itemtest", appHandler.TESTAPISTOCKhandle)
 
-	fmt.Printf("port running on localhost:8080/\n")
-	if err := http.ListenAndServe(":8080", mux); err != nil {
+	fmt.Printf("port running on localhost:8000/\n")
+	if err := http.ListenAndServe(":8000", mux); err != nil {
 		log.Fatal(err)
 	}
 

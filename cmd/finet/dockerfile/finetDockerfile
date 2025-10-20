@@ -9,7 +9,7 @@ COPY cmd/finet/ .
 
 RUN go build -o ./finet-server ./main.go
 
-EXPOSE 8080
+EXPOSE 8000
 
 CMD ["./finet-server"]
 
