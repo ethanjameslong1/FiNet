@@ -5,13 +5,14 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"github.com/ethanjameslong1/FiNet/database"
-	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/ethanjameslong1/FiNet/database"
+	"github.com/google/uuid"
 )
 
 type contextKey string
@@ -130,49 +131,67 @@ func (h *Handler) ShowLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		log.Printf("Error parsing form: %v", err)
-		http.Error(w, "Bad request", http.StatusBadRequest)
-		return
-	}
-	username := r.FormValue("username")
-	password := r.FormValue("password")
+    if r.Method != http.MethodPost {
+        http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+        return
+    }
 
-	if username == "" || password == "" {
-		http.Error(w, "Username or password cannot be empty", http.StatusBadRequest)
-		return
-	}
+    // Decode JSON body
+    var creds UserLoginData
+    if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
+        log.Printf("Error decoding JSON body: %v", err)
+        http.Error(w, "Invalid request payload", http.StatusBadRequest)
+        return
+    }
 
-	user, err := h.UserSessionDBService.AuthenticateUser(r.Context(), username, password)
-	if err != nil {
-		log.Printf("Login attempt failed for user '%s': %v", username, err)
-		if errors.Is(err, sql.ErrNoRows) || strings.Contains(err.Error(), "user not found") || strings.Contains(err.Error(), "invalid password") {
-			http.Error(w, "Invalid username or password", http.StatusUnauthorized)
-			return
-		}
-		http.Error(w, "Login failed due to a server error", http.StatusInternalServerError)
-		return
-	}
+    username := strings.TrimSpace(creds.Name)
+    password := strings.TrimSpace(creds.Password)
 
-	sessionID := uuid.New()
-	_, err = h.UserSessionDBService.AddSession(r.Context(), sessionID, user.ID, h.SessionDuration)
-	if err != nil {
-		log.Printf("Error adding session for user '%s': %v", user.Username, err)
-		http.Error(w, "Failed to create session", http.StatusInternalServerError)
-		return
-	}
+    if username == "" || password == "" {
+        http.Error(w, "Username or password cannot be empty", http.StatusBadRequest)
+        return
+    }
 
-	cookie := http.Cookie{
-		Name:  "SessionCookie",
-		Value: sessionID.String(), Path: "/finet/",
-		Expires:  time.Now().Add(h.SessionDuration),
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteLaxMode,
-	}
-	http.SetCookie(w, &cookie)
-	http.Redirect(w, r, "/finet/homepage", http.StatusSeeOther)
+    // Authenticate user
+    user, err := h.UserSessionDBService.AuthenticateUser(r.Context(), username, password)
+    if err != nil {
+        log.Printf("Login attempt failed for user '%s': %v", username, err)
+        if errors.Is(err, sql.ErrNoRows) || strings.Contains(err.Error(), "user not found") || strings.Contains(err.Error(), "invalid password") {
+            http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+            return
+        }
+        http.Error(w, "Login failed due to a server error", http.StatusInternalServerError)
+        return
+    }
 
+    // Create session
+    sessionID := uuid.New()
+    _, err = h.UserSessionDBService.AddSession(r.Context(), sessionID, user.ID, h.SessionDuration)
+    if err != nil {
+        log.Printf("Error adding session for user '%s': %v", user.Username, err)
+        http.Error(w, "Failed to create session", http.StatusInternalServerError)
+        return
+    }
+
+    // Set cookie
+    cookie := http.Cookie{
+        Name:     "SessionCookie",
+        Value:    sessionID.String(),
+        Path:     "/finet/",
+        Expires:  time.Now().Add(h.SessionDuration),
+        HttpOnly: true,
+        Secure:   true,
+        SameSite: http.SameSiteLaxMode,
+    }
+    http.SetCookie(w, &cookie)
+
+    // Respond with JSON instead of redirect
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(map[string]string{
+        "message": "Login successful",
+        "username": username,
+    })
 }
 
 func (h *Handler) ShowRegistration(w http.ResponseWriter, r *http.Request) {
@@ -198,30 +217,45 @@ func (h *Handler) ShowRegistration(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) RegistrationHandler(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		log.Printf("Error parsing form: %v", err)
-		http.Error(w, "Bad request", http.StatusBadRequest)
-		return
-	}
-	username := r.FormValue("username")
-	password := r.FormValue("password")
+    if r.Method != http.MethodPost {
+        http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+        return
+    }
 
-	if username == "" || password == "" {
-		http.Error(w, "Username or password cannot be empty", http.StatusBadRequest)
-		return
-	}
+    // Decode JSON body
+    var creds UserLoginData
+    if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
+        log.Printf("Error decoding JSON body: %v", err)
+        http.Error(w, "Invalid request payload", http.StatusBadRequest)
+        return
+    }
 
-	succuess, err := h.UserSessionDBService.AddUser(r.Context(), username, password)
-	if err != nil || !succuess {
-		log.Printf("Register attempt failed for user '%s': %v", username, err)
-		http.Error(w, "Register failed due to a server error", http.StatusInternalServerError)
-		return
-	}
-	_, err = h.UserSessionDBService.GetUserByName(r.Context(), username)
-	if err != nil {
-		log.Printf("Error finding recently added user %s: %v", username, err)
-		http.Error(w, "Failed to find recently added user", http.StatusInternalServerError)
-		return
-	}
-	http.Redirect(w, r, "/finet/login", http.StatusSeeOther)
+    username := strings.TrimSpace(creds.Name)
+    password := strings.TrimSpace(creds.Password)
+
+    if username == "" || password == "" {
+        http.Error(w, "Username or password cannot be empty", http.StatusBadRequest)
+        return
+    }
+
+    success, err := h.UserSessionDBService.AddUser(r.Context(), username, password)
+    if err != nil || !success {
+        log.Printf("Register attempt failed for user '%s': %v", username, err)
+        http.Error(w, "Register failed due to a server error", http.StatusInternalServerError)
+        return
+    }
+
+    _, err = h.UserSessionDBService.GetUserByName(r.Context(), username)
+    if err != nil {
+        log.Printf("Error finding recently added user %s: %v", username, err)
+        http.Error(w, "Failed to find recently added user", http.StatusInternalServerError)
+        return
+    }
+
+    // Return success JSON (instead of redirect)
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(map[string]string{
+        "message": "User registered successfully",
+    })
 }
