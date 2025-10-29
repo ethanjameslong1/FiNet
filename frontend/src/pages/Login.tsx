@@ -14,7 +14,7 @@ const LoginPage = () => {
         </p>
 
         {/* Login Form */}
-        <form method="POST" action="/login" className="space-y-5">
+        <form method="POST" action="/finet/login" className="space-y-5">
           {/* Username Input */}
           <div>
             <label

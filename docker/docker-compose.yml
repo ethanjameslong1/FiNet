@@ -1,7 +1,6 @@
 services:
   user_session_db:
     image: mysql:8.0
-    container_name: user_session_db
     environment:
       MYSQL_DATABASE: user_session_db
       MYSQL_ROOT_PASSWORD: Front2Back!
@@ -14,35 +13,45 @@ services:
 
   stock_prediction_db:
     image: mysql:8.0
-    container_name: stock_prediction_db
     environment:
       MYSQL_DATABASE: stock_prediction_db
       MYSQL_ROOT_PASSWORD: Front2Back!
-
     volumes:
       - ./stock_prediction_db/init.sql:/docker-entrypoint-initdb.d/init.sql
       - stock_prediction_data:/var/lib/mysql
     networks:
       - app_network
     restart: always
+  
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    networks:
+      - app_network
+    depends_on:
+      finet:
+        condition: service_started
+      analysis:
+        condition: service_started
 
   finet:
     build:
       context: ..
       dockerfile: ./cmd/finet/dockerfile/finetDockerfile
-    container_name: finet_app
     expose:
       - "8000"
     environment:
       DB_USER_SESSION_HOST: user_session_db
       DB_USER_SESSION_PORT: 3306
       DB_USER_SESSION_NAME: user_session_db
-
       DB_STOCK_PREDICTION_HOST: stock_prediction_db
       DB_STOCK_PREDICTION_PORT: 3306
       DB_STOCK_PREDICTION_NAME: stock_prediction_db
     networks:
-    - app_network
+      - app_network
     depends_on:
       user_session_db:
         condition: service_started
@@ -50,25 +59,10 @@ services:
         condition: service_started
     restart: always
 
-  frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
-    container_name: frontend
-    ports:
-      - "8080:80"
-    networks:
-      - app_network
-    depends_on:
-      - finet
-      - stock
-    restart: always
-
-  stock:
+  analysis:
     build:
       context: ..
       dockerfile: ./cmd/stock/dockerfile/stockDockerfile
-    container_name: stock_analysis
     expose:
       - "8001"
     environment:
@@ -76,7 +70,7 @@ services:
       DB_STOCK_PREDICTION_PORT: 3306
       DB_STOCK_PREDICTION_NAME: stock_prediction_db
     networks:
-    - app_network
+      - app_network
     depends_on:
       user_session_db:
         condition: service_started
@@ -84,9 +78,11 @@ services:
         condition: service_started
 
 volumes:
- user_session_data:
- stock_prediction_data:
+  user_session_data:
+  stock_prediction_data:
 
 networks:
   app_network:
     driver: bridge
+
+

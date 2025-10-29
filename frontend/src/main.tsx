@@ -16,6 +16,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/register" element={<Register />} />
         <Route path="/home" element={<UserHomepage name="User" />} />
         <Route path="/portfolio" element={<Portfolio />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
     </Router>
   </StrictMode>

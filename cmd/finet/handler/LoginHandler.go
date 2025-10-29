@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/ethanjameslong1/FiNet/database"
-	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"strings"
@@ -50,7 +49,7 @@ type testItem struct {
 	Name string `json:"name"`
 }
 
-var stockAPIURL = "http://stock_analysis:9090/item"
+var stockAPIURL = "http://analysis:8001/item"
 
 func (h *Handler) TESTAPISTOCKhandle(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -107,29 +106,32 @@ func NewHandler(UserSessionDB *database.DBService, StockDB *database.DBService, 
 	}, nil
 }
 
-func (h *Handler) ShowLogin(w http.ResponseWriter, r *http.Request) {
-
-	_, ok := r.Context().Value(userContextKey).(database.User)
-	if ok {
-		http.Redirect(w, r, "/finet/stock", http.StatusSeeOther)
-		return
-	}
-
-	tmpl, err := template.ParseFiles("static/login.html")
-	if err != nil {
-		log.Printf("Error parsing login template: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-	err = tmpl.Execute(w, PageData{})
-	if err != nil {
-		log.Printf("Error executing login template: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-}
+// func (h *Handler) ShowLogin(w http.ResponseWriter, r *http.Request) {
+//
+// 	_, ok := r.Context().Value(userContextKey).(database.User)
+// 	if ok {
+// 		http.Redirect(w, r, "/finet/stock", http.StatusSeeOther)
+// 		return
+// 	}
+//
+// 	tmpl, err := template.ParseFiles("static/login.html")
+// 	if err != nil {
+// 		log.Printf("Error parsing login template: %v", err)
+// 		http.Error(w, "Internal server error", http.StatusInternalServerError)
+// 		return
+// 	}
+// 	err = tmpl.Execute(w, PageData{})
+// 	if err != nil {
+// 		log.Printf("Error executing login template: %v", err)
+// 		http.Error(w, "Internal server error", http.StatusInternalServerError)
+// 		return
+// 	}
+// }
 
 func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
+
+	log.Printf("DEBUG: LoginHandler running")
+
 	if err := r.ParseForm(); err != nil {
 		log.Printf("Error parsing form: %v", err)
 		http.Error(w, "Bad request", http.StatusBadRequest)
@@ -137,13 +139,14 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	username := r.FormValue("username")
 	password := r.FormValue("password")
+	log.Printf("DEBUG: un: %s, pw: %s", username, password)
 
 	if username == "" || password == "" {
 		http.Error(w, "Username or password cannot be empty", http.StatusBadRequest)
 		return
 	}
 
-	user, err := h.UserSessionDBService.AuthenticateUser(r.Context(), username, password)
+	_, err := h.UserSessionDBService.AuthenticateUser(r.Context(), username, password)
 	if err != nil {
 		log.Printf("Login attempt failed for user '%s': %v", username, err)
 		if errors.Is(err, sql.ErrNoRows) || strings.Contains(err.Error(), "user not found") || strings.Contains(err.Error(), "invalid password") {
@@ -154,24 +157,24 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionID := uuid.New()
-	_, err = h.UserSessionDBService.AddSession(r.Context(), sessionID, user.ID, h.SessionDuration)
-	if err != nil {
-		log.Printf("Error adding session for user '%s': %v", user.Username, err)
-		http.Error(w, "Failed to create session", http.StatusInternalServerError)
-		return
-	}
-
-	cookie := http.Cookie{
-		Name:  "SessionCookie",
-		Value: sessionID.String(), Path: "/finet/",
-		Expires:  time.Now().Add(h.SessionDuration),
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteLaxMode,
-	}
-	http.SetCookie(w, &cookie)
-	http.Redirect(w, r, "/finet/homepage", http.StatusSeeOther)
+	// sessionID := uuid.New()
+	// _, err = h.UserSessionDBService.AddSession(r.Context(), sessionID, user.ID, h.SessionDuration)
+	// if err != nil {
+	// 	log.Printf("Error adding session for user '%s': %v", user.Username, err)
+	// 	http.Error(w, "Failed to create session", http.StatusInternalServerError)
+	// 	return
+	// }
+	//
+	// cookie := http.Cookie{
+	// 	Name:  "SessionCookie",
+	// 	Value: sessionID.String(), Path: "/finet/",
+	// 	Expires:  time.Now().Add(h.SessionDuration),
+	// 	HttpOnly: true,
+	// 	Secure:   true,
+	// 	SameSite: http.SameSiteLaxMode,
+	// }
+	// http.SetCookie(w, &cookie)
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
 
 }
 

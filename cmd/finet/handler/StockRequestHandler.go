@@ -88,7 +88,7 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to prepare data for stock API call", http.StatusInternalServerError)
 		return
 	}
-	stockAPIURL := "http://stock_analysis:9090/item" //TODO put this somewhere
+	stockAPIURL := "http://analysis:8001/item" //TODO put this somewhere
 	req, err := http.NewRequest("POST", stockAPIURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		http.Error(w, "Failed to create request for stock API", http.StatusInternalServerError)
@@ -152,19 +152,19 @@ func (h *Handler) ShowPredictionsHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *Handler) RawDataRequest(w http.ResponseWriter, r *http.Request) {
-	user, ok := r.Context().Value(userContextKey).(database.User)
-	if !ok {
-		log.Printf("Error: User not found in context for StockHandler. Redirecting to login.")
-		http.Redirect(w, r, "/finet/", http.StatusFound)
-		return
-	}
-	data := PageData{
-		UserData: UserLoginData{
-			Name: user.Username,
-		},
-		Error:    nil,
-		Interval: "Weekly",
-	}
+	// user, ok := r.Context().Value(userContextKey).(database.User)
+	// if !ok {
+	// 	log.Printf("Error: User not found in context for StockHandler. Redirecting to login.")
+	// 	http.Redirect(w, r, "/finet/", http.StatusFound)
+	// 	return
+	// }
+	// data := PageData{
+	// 	UserData: UserLoginData{
+	// 		Name: user.Username,
+	// 	},
+	// 	Error:    nil,
+	// 	Interval: "Weekly",
+	// }
 
 	tmpl, err := template.ParseFiles("static/rawDataRequest.html")
 	if err != nil {
@@ -172,7 +172,7 @@ func (h *Handler) RawDataRequest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-	err = tmpl.Execute(w, data)
+	err = tmpl.Execute(w, PageData{})
 	if err != nil {
 		log.Printf("Error executing login template: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -187,11 +187,7 @@ func (h *Handler) RawDataHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/finet/login", http.StatusNotFound)
 		return
 	}
-	if err := r.ParseForm(); err != nil {
-		log.Printf("Error parsing form: %v", err)
-		http.Error(w, "Bad request", http.StatusBadRequest)
-		return
-	}
+
 	err := r.ParseForm()
 	if err != nil {
 		log.Printf("error parsing form: %v", err)
@@ -211,7 +207,8 @@ func (h *Handler) RawDataHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-
+	//TODO make this an API call to analysis container instead and remove uneeded dependencies
+	//TODO or somehow make specifically this easy call to alpha vantage decoupled enough for the front end server to handle it.
 	dataSlice, err := analysis.MakeWeeklyDataSlice(r.Context(), symbol)
 	if err != nil {
 		log.Printf("Error creating data slice for analysis: %v", err)
