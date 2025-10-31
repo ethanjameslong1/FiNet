@@ -14,7 +14,7 @@ const UserHomepage = ({ name }: { name: string }) => {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-        <Card
+        {/* <Card
           title="Raw Stock Data"
           description="Access and review unprocessed stock market data directly from the source."
           icon={
@@ -65,7 +65,7 @@ const UserHomepage = ({ name }: { name: string }) => {
           buttonText="Go to Analysis"
           buttonTo="/stock"
           hoverScale
-        />
+        /> */}
         <Card
           title="Portfolio Management"
           description="Manage your investment portfolio with our intuitive tools and insights."

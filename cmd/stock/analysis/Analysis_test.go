@@ -67,7 +67,7 @@ func TestStoreWeeklyDataV1(t *testing.T) {
 	}
 
 	// --- Test Execution ---
-	relationshipMap, err := analysis.StoreWeeklyDataV1(mockWeeklyData, "2025-06-27", analysis.StockWeights{})
+	relationshipMap, err := analysis.StoreWeeklyDataV1(mockWeeklyData, "2025-06-27", 0)
 	if err != nil {
 		t.Fatalf("StoreWeeklyData returned an unexpected error: %v", err)
 	}

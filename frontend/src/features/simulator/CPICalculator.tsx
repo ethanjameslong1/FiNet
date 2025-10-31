@@ -31,7 +31,7 @@ const CPICalculator = ({ onChange, defaults }: CPICalculatorProps) => {
     setInputs(updated);
     onChange(updated);
   };
-// TODO figure out how forms work
+
   return (
     <div>
       {/* CPI Assumptions */}

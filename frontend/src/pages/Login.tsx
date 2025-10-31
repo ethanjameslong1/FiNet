@@ -26,8 +26,6 @@ const LoginPage = () => {
       const data = await response.json();
       console.log("Login successful:", data);
 
-      // Example next step
-      // localStorage.setItem("token", data.token);
       navigate("/home");
     } catch (error: unknown) {
       if (error instanceof Error) {
