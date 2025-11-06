@@ -1,7 +1,46 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import type { FormEvent } from "react";
 import { Button } from "../components/Button";
 
 const LoginPage = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null); // <-- CHANGED
+  
+  const navigate = useNavigate();
+
+  const handleLoginSubmit = async (event: FormEvent<HTMLFormElement>) => { // <-- CHANGED
+    event.preventDefault(); 
+    setError(null);
+
+    try {
+      const response = await fetch("finet/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Login failed. Please try again.");
+        return;
+      }
+
+      localStorage.setItem("authToken", data.token);
+      localStorage.setItem("username", data.username);
+
+      navigate("/home");
+
+    } catch (err) {
+      console.error("Login request failed:", err);
+      setError("A network error occurred. Please try again later.");
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 font-sans">
       <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-md">
@@ -13,8 +52,7 @@ const LoginPage = () => {
           Welcome back! Please enter your credentials.
         </p>
 
-        {/* Login Form */}
-        <form method="POST" action="/finet/login" className="space-y-5">
+        <form onSubmit={handleLoginSubmit} className="space-y-5">
           {/* Username Input */}
           <div>
             <label
@@ -32,10 +70,12 @@ const LoginPage = () => {
                          rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
                          focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               placeholder="Enter your username"
+              // --- 6. CONTROLLED INPUTS ---
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
           </div>
 
-          {/* Password Input */}
           <div>
             <label
               htmlFor="password"
@@ -52,14 +92,21 @@ const LoginPage = () => {
                          rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
                          focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               placeholder="Enter your password"
+              // --- 6. CONTROLLED INPUTS ---
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
-          {/* Submit Button */}
+          {error && (
+            <div className="text-center text-sm text-red-500">
+              {error}
+            </div>
+          )}
+
           <Button type="submit">Sign In</Button>
         </form>
 
-        {/* Register Link */}
         <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
           Don&apos;t have an account?{" "}
           <Link

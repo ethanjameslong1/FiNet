@@ -4,7 +4,6 @@ import Card from "../components/Card";
 const UserHomepage = ({ name }: { name: string }) => {
   return (
     <Layout>
-// check request body for 'success' key, verify that it's true and access username key for 'username' data, if success is failed just pop an error message
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
           Welcome, {name}!

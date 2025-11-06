@@ -128,17 +128,21 @@ func NewHandler(UserSessionDB *database.DBService, StockDB *database.DBService, 
 // 	}
 // }
 
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
-	log.Printf("DEBUG: LoginHandler running")
-
-	if err := r.ParseForm(); err != nil {
-		log.Printf("Error parsing form: %v", err)
-		http.Error(w, "Bad request", http.StatusBadRequest)
+	var p LoginRequest
+	err := json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	username := r.FormValue("username")
-	password := r.FormValue("password")
+	username := p.Username
+	password := p.Password
 	log.Printf("DEBUG: un: %s, pw: %s", username, password)
 
 	if username == "" || password == "" {
@@ -146,7 +150,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := h.UserSessionDBService.AuthenticateUser(r.Context(), username, password)
+	_, err = h.UserSessionDBService.AuthenticateUser(r.Context(), username, password)
 	if err != nil {
 		log.Printf("Login attempt failed for user '%s': %v", username, err)
 		if errors.Is(err, sql.ErrNoRows) || strings.Contains(err.Error(), "user not found") || strings.Contains(err.Error(), "invalid password") {
@@ -174,7 +178,12 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// 	SameSite: http.SameSiteLaxMode,
 	// }
 	// http.SetCookie(w, &cookie)
-	http.Redirect(w, r, "/home", http.StatusSeeOther)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"authToken": "Login successful",
+		"username":  username,
+	})
 
 }
 

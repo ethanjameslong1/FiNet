@@ -181,12 +181,12 @@ func (h *Handler) RawDataRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) RawDataHandler(w http.ResponseWriter, r *http.Request) {
-	_, ok := r.Context().Value(userContextKey).(database.User)
-	if !ok {
-		log.Printf("Error: User not found in context for StockHandler. Redirecting to login.")
-		http.Redirect(w, r, "/finet/login", http.StatusNotFound)
-		return
-	}
+	// _, ok := r.Context().Value(userContextKey).(database.User)
+	// if !ok {
+	// 	log.Printf("Error: User not found in context for StockHandler. Redirecting to login.")
+	// 	http.Redirect(w, r, "/finet/login", http.StatusNotFound)
+	// 	return
+	// }
 
 	err := r.ParseForm()
 	if err != nil {

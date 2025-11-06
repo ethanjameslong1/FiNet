@@ -63,8 +63,8 @@ func main() {
 	mux.HandleFunc("GET /register", appHandler.ShowRegistration)
 	mux.HandleFunc("POST /register", appHandler.RegistrationHandler)
 	mux.Handle("GET /predictions", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.ShowPredictionsHandler))) // PROD: requires sessionManagement, not removing middleware
-	mux.HandleFunc("GET /rawdata", http.HandlerFunc(appHandler.RawDataRequest))
-	mux.HandleFunc("POST /rawdata", http.HandlerFunc(appHandler.RawDataHandler))
+	mux.HandleFunc("GET /rawdata", appHandler.RawDataRequest)
+	mux.HandleFunc("POST /rawdata", appHandler.RawDataHandler)
 	mux.HandleFunc("GET /logout", appHandler.LogoutHandler)
 
 	//TEST this is just to ensure that once nginx is in place we can properly move analysis logic over. Functions are in loginhandler.go, just change the struct there to test whatever
