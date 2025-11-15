@@ -67,6 +67,8 @@ func main() {
 	mux.HandleFunc("POST /rawdata", appHandler.RawDataHandler)
 	mux.HandleFunc("GET /logout", appHandler.LogoutHandler)
 
+	mux.HandleFunc("POST /middleware", appHandler.Middleware)
+
 	//TEST this is just to ensure that once nginx is in place we can properly move analysis logic over. Functions are in loginhandler.go, just change the struct there to test whatever
 	mux.HandleFunc("GET /testapi", appHandler.TESTAPISTOCK)
 	mux.HandleFunc("POST /itemtest", appHandler.TESTAPISTOCKhandle)

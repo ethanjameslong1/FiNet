@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/ethanjameslong1/FiNet/database"
+	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"strings"
@@ -150,7 +151,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = h.UserSessionDBService.AuthenticateUser(r.Context(), username, password)
+	user, err := h.UserSessionDBService.AuthenticateUser(r.Context(), username, password)
 	if err != nil {
 		log.Printf("Login attempt failed for user '%s': %v", username, err)
 		if errors.Is(err, sql.ErrNoRows) || strings.Contains(err.Error(), "user not found") || strings.Contains(err.Error(), "invalid password") {
@@ -161,14 +162,21 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// sessionID := uuid.New()
-	// _, err = h.UserSessionDBService.AddSession(r.Context(), sessionID, user.ID, h.SessionDuration)
-	// if err != nil {
-	// 	log.Printf("Error adding session for user '%s': %v", user.Username, err)
-	// 	http.Error(w, "Failed to create session", http.StatusInternalServerError)
-	// 	return
-	// }
-	//
+	sessionID := uuid.New()
+	_, err = h.UserSessionDBService.AddSession(r.Context(), sessionID, user.ID, h.SessionDuration)
+	if err != nil {
+		log.Printf("Error adding session for user '%s': %v", user.Username, err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{
+			"authToken": "",
+			"username":  "",
+		})
+		http.Error(w, "Failed to create session", http.StatusInternalServerError)
+		return
+	}
+	stringSessionId := sessionID.String()
+
 	// cookie := http.Cookie{
 	// 	Name:  "SessionCookie",
 	// 	Value: sessionID.String(), Path: "/finet/",
@@ -178,10 +186,11 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// 	SameSite: http.SameSiteLaxMode,
 	// }
 	// http.SetCookie(w, &cookie)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{
-		"authToken": "Login successful",
+		"authToken": stringSessionId,
 		"username":  username,
 	})
 

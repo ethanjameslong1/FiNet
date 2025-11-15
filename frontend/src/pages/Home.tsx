@@ -1,12 +1,50 @@
 import Layout from "../components/Layout";
 import Card from "../components/Card";
+import { useState, useEffect } from "react";
 
-const UserHomepage = ({ name }: { name: string }) => {
+const UserHomepage = () => {
+
+
+  const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    authToken = localStorage.getItem("authToken");
+    try {
+      const response = await fetch("finet/Middleware", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ authToken }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || "Session Auth failed.");
+        localStorage.setItem("authToken", "");
+        localStorage.setItem("username", "");
+        navigate("/login");
+      }
+      localStorage.setItem("authToken", data.authToken);
+      localStorage.setItem("username", data.username);
+    } catch (err) {
+      console.error("Request failed:", err);
+      setError("A network error occurred. Please try again later.");
+      navigate("/login");
+    }
+  };
+
+  const [name, setName] = useState<string | null>(null);
+  useEffect(() => {
+    const storedName = localStorage.getItem("username");
+    if (storedName) {
+      setName(storedName);
+    }
+  }, []);
+
   return (
     <Layout>
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
-          Welcome, {name}!
+          Welcome, {name || "User"}!
         </h1>
         <p className="text-gray-600 dark:text-gray-300 mt-2">
           What would you like to do today?
@@ -14,6 +52,7 @@ const UserHomepage = ({ name }: { name: string }) => {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        {/* === THIS IS THE MODIFIED CARD === */}
         <Card
           title="Raw Stock Data"
           description="Access and review unprocessed stock market data directly from the source."
@@ -40,9 +79,12 @@ const UserHomepage = ({ name }: { name: string }) => {
             </svg>
           }
           buttonText="Go to Raw Data"
-          buttonTo="/finet/rawdata"
+          onClick={() => {
+            window.location.href = "/finet/rawdata";
+          }}
           hoverScale
         />
+
         <Card
           title="Stock Analysis"
           description="Utilize our tools to perform in-depth analysis and generate predictive insights."
@@ -63,9 +105,12 @@ const UserHomepage = ({ name }: { name: string }) => {
             </svg>
           }
           buttonText="Go to Analysis"
-          buttonTo="/finet/stock"
+          onClick={() => {
+            window.location.href = "/finet/stock";
+          }}
           hoverScale
         />
+
         <Card
           title="Portfolio Management"
           description="Manage your investment portfolio with our intuitive tools and insights."

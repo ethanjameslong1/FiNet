@@ -8,8 +8,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// adds a user to the database given creation context, name, and string
-// currently not in use, don't plan on adding functionality to add users easily. For my current intents only the one user I added manually is neccesary
 func (s *DBService) AddUser(ctx context.Context, name string, password string) (bool, error) {
 	hashedPW, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -29,7 +27,6 @@ func (s *DBService) AddUser(ctx context.Context, name string, password string) (
 	return true, nil
 }
 
-// returns a Person type that matches query name
 func (s *DBService) GetUserByName(ctx context.Context, username string) (User, error) {
 	person := User{}
 	row := s.db.QueryRowContext(ctx, SQL_SELECT_USER_BY_USERNAME, username)
@@ -56,7 +53,6 @@ func (s *DBService) GetUserByID(ctx context.Context, ID int) (User, error) {
 	return person, nil
 }
 
-// checks name and password and returns matching Person object
 func (s *DBService) AuthenticateUser(ctx context.Context, name string, passwordHash string) (User, error) {
 	user, err := s.GetUserByName(ctx, name)
 	if err != nil {

@@ -1,15 +1,16 @@
 import React from "react";
-import { Button } from "./Button";
+import { Link } from "react-router-dom";
 
 interface CardProps {
   title: string;
   description: string;
-  icon?: React.ReactNode; // optional icon
-  header?: React.ReactNode; // optional custom header (overrides title + icon)
-  buttonText?: string; // optional button text
-  buttonTo?: string; // optional link
-  className?: string; // extra wrapper classes
-  hoverScale?: boolean; // optionally enable hover scaling
+  icon?: React.ReactNode;
+  header?: React.ReactNode;
+  buttonText?: string;
+  buttonTo?: string;
+  onClick?: () => void;
+  className?: string;
+  hoverScale?: boolean;
 }
 
 const Card = ({
@@ -19,17 +20,17 @@ const Card = ({
   header,
   buttonText,
   buttonTo,
+  onClick,
   className = "",
   hoverScale = false,
 }: CardProps) => {
   return (
     <div
       className={`bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg
-                  hover:shadow-xl transition-shadow duration-300
-                  ${hoverScale ? "hover:scale-105 transition-transform" : ""}
-                  ${className}`}
+                 hover:shadow-xl transition-shadow duration-300
+                 ${hoverScale ? "hover:scale-105 transition-transform" : ""}
+                 ${className}`}
     >
-      {/* Optional custom header */}
       {header ? (
         <div className="mb-6">{header}</div>
       ) : (
@@ -47,7 +48,22 @@ const Card = ({
 
       <p className="text-gray-600 dark:text-gray-300 mb-6">{description}</p>
 
-      {buttonText && buttonTo && <Button to={buttonTo}>{buttonText}</Button>}
+      {buttonText &&
+        (buttonTo ? (
+          <Link
+            to={buttonTo}
+            className="inline-block px-6 py-3 text-base font-medium text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+          >
+            {buttonText}
+          </Link>
+        ) : onClick ? (
+          <button
+            onClick={onClick}
+            className="inline-block px-6 py-3 text-base font-medium text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+          >
+            {buttonText}
+          </button>
+        ) : null)}
     </div>
   );
 };

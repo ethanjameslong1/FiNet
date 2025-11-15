@@ -3,7 +3,7 @@ import { Button } from "../components/Button";
 const Logout = () => {
   return (
     <div>
-      <Button to="/" type="submit">
+      <Button to="/logout" type="submit">
         Logout
       </Button>
     </div>

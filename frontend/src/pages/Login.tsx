@@ -6,11 +6,10 @@ import { Button } from "../components/Button";
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null); // <-- CHANGED
-  
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleLoginSubmit = async (event: FormEvent<HTMLFormElement>) => { // <-- CHANGED
+  const handleLoginSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault(); 
     setError(null);
 
@@ -30,8 +29,9 @@ const LoginPage = () => {
         return;
       }
 
-      localStorage.setItem("authToken", data.token);
+      localStorage.setItem("authToken", data.authToken);
       localStorage.setItem("username", data.username);
+
 
       navigate("/home");
 
@@ -67,10 +67,9 @@ const LoginPage = () => {
               name="username"
               required
               className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 
-                         rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                         focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+              focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               placeholder="Enter your username"
-              // --- 6. CONTROLLED INPUTS ---
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
@@ -89,10 +88,9 @@ const LoginPage = () => {
               name="password"
               required
               className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 
-                         rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                         focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+              focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               placeholder="Enter your password"
-              // --- 6. CONTROLLED INPUTS ---
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
