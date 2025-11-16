@@ -1,17 +1,17 @@
 // FileSearchServer.go
 
-//testing git authentication
-
+// testing git authentication
 package main
 
 import (
 	"context"
 	"fmt"
-	"github.com/ethanjameslong1/FiNet/cmd/finet/handler"
-	"github.com/ethanjameslong1/FiNet/database"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/ethanjameslong1/FiNet/cmd/finet/handler"
+	"github.com/ethanjameslong1/FiNet/database"
 )
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer servUSDB.Close()
+	defer servUSDB.Close() // TODO: determine if error being checked here is important
 	servStockDB, err := database.NewDBService(ctx, database.StockDataSource)
 	if err != nil {
 		log.Fatal(err)
@@ -77,5 +77,4 @@ func main() {
 	if err := http.ListenAndServe(":8000", mux); err != nil {
 		log.Fatal(err)
 	}
-
 }

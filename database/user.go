@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
 	_ "github.com/go-sql-driver/mysql"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -67,5 +68,4 @@ func (s *DBService) AuthenticateUser(ctx context.Context, name string, passwordH
 	}
 	user.PasswordHash = ""
 	return user, nil
-
 }
