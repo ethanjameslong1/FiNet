@@ -1,11 +1,10 @@
-module github.com/ethanjameslong1/FiNet
+module github.com/ethanjameslong1/FiNet/cmd/finet
 
 go 1.25.4
 
 require (
-	github.com/ethanjameslong1/FiNet/cmd/finet v0.0.0-20250930190400-a106d3ee87fa
-	github.com/ethanjameslong1/FiNet/cmd/stock v0.0.0-20250930190400-a106d3ee87fa
-	github.com/ethanjameslong1/FiNet/database v0.0.0-20250930190400-a106d3ee87fa
+	github.com/ethanjameslong1/FiNet/cmd/stock v0.0.0-20251116065259-70d712ccd90e
+	github.com/ethanjameslong1/FiNet/database v0.0.0-20251116065259-70d712ccd90e
 	github.com/google/uuid v1.6.0
 )
 
