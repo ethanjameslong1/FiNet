@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock API Tester</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+
+    <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md">
+        <h1 class="text-3xl font-bold mb-2 text-center text-cyan-400">Send Item to Stock API</h1>
+        <p class="text-center text-gray-400 mb-6">Enter an ID and Name to send a POST request to your Go backend running
+            on port 9090.</p>
+
+        <!-- Form to send data -->
+        <form id="itemForm" class="space-y-6">
+            <div>
+                <label for="itemId" class="block text-sm font-medium text-gray-300 mb-2">Item ID</label>
+                <input type="number" id="itemId" name="itemId" placeholder="e.g., 4" required
+                    class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-200">
+            </div>
+
+            <div>
+                <label for="itemName" class="block text-sm font-medium text-gray-300 mb-2">Item Name</label>
+                <input type="text" id="itemName" name="itemName" placeholder="e.g., 'NewItem'" required
+                    class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-200">
+            </div>
+
+            <button type="submit"
+                class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transform hover:scale-105 transition duration-300 ease-in-out">
+                Send Item
+            </button>
+        </form>
+
+        <!-- Section to display the server response -->
+        <div id="response" class="mt-6 p-4 bg-gray-700 rounded-lg hidden">
+            <h2 class="text-lg font-semibold mb-2 text-gray-200">Server Response:</h2>
+            <pre class="bg-gray-900 p-3 rounded-md text-sm text-green-400 overflow-x-auto"><code
+                    id="response-data"></code></pre>
+        </div>
+        <div id="error" class="mt-6 p-4 bg-red-900 border border-red-700 rounded-lg hidden">
+            <h2 class="text-lg font-semibold mb-2 text-gray-200">Error:</h2>
+            <pre class="p-3 rounded-md text-sm text-red-300 overflow-x-auto"><code id="error-data"></code></pre>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('itemForm').addEventListener('submit', async function (event) {
+            // Prevent the default form submission
+            event.preventDefault();
+
+            // Get values from the form
+            const itemId = parseInt(document.getElementById('itemId').value, 10);
+            const itemName = document.getElementById('itemName').value;
+
+            // Clear previous responses and hide response boxes
+            const responseDiv = document.getElementById('response');
+            const responseData = document.getElementById('response-data');
+            const errorDiv = document.getElementById('error');
+            const errorData = document.getElementById('error-data');
+            responseDiv.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+
+
+            // Create the data object to send
+            const newItem = {
+                id: itemId,
+                name: itemName,
+            };
+
+            try {
+                // Send the POST request to your Go service
+                // This assumes you are running this page on your local machine
+                // and the docker container port 9090 is mapped to your localhost.
+                const response = await fetch('/itemtest', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newItem),
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${JSON.stringify(result)}`);
+                }
+
+
+                // Display the response from the server
+                responseData.textContent = JSON.stringify(result, null, 2);
+                responseDiv.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Error sending item:', error);
+                errorData.textContent = error.message + '\n\nCould not connect to the API. Is your docker-compose running and the port 9090 exposed?';
+                errorDiv.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+
+</html>

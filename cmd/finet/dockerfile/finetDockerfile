@@ -1,0 +1,15 @@
+FROM golang:1.24
+
+WORKDIR /usr/src/app
+
+COPY cmd/finet/go.mod cmd/finet/go.sum ./
+RUN go mod download
+
+COPY cmd/finet/ .
+
+RUN go build -o ./finet-server ./main.go
+
+EXPOSE 8000
+
+CMD ["./finet-server"]
+

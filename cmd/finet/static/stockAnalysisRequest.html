@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Homepage - Stock Analysis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f4f8;
+      /* Light blue-gray background */
+    }
+
+    /* Custom styling for the multiselect box for better aesthetics */
+    select[multiple] {
+      border-radius: 0.5rem;
+      border-width: 1px;
+      border-color: #D1D5DB;
+      /* gray-300 */
+      padding: 0.75rem 1rem;
+      transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+    select[multiple]:focus {
+      outline: none;
+      border-color: #4F46E5;
+      /* indigo-600 */
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+    }
+
+    select[multiple] option {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+    }
+
+    select[multiple] option:checked {
+      background-color: #4F46E5;
+      /* indigo-600 */
+      color: white;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+  <header class="bg-white shadow-md">
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="#" class="text-2xl font-bold text-purple-600">Finet</a>
+      <div class="flex items-center space-x-4">
+        <a href="/finet/homepage"
+          class="bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition duration-300">
+          Home
+        </a>
+        <a href="/finet/logout"
+          class="bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition duration-300">
+          Logout
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container mx-auto px-6 py-12">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-800">Welcome, {{.UserData.Name}}!</h1>
+      <p class="text-gray-600 mt-2">What would you like to do today?</p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8 md:p-10 w-full max-w-2xl mx-auto">
+      <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-4">
+        Stock Analysis Selector
+      </h1>
+      <p class="text-center text-gray-600 mb-8 text-md sm:text-lg">
+        Choose individual stocks or select a pre-defined list to begin your analysis.
+      </p>
+
+      <form action="/finet/stock" method="POST" class="space-y-8">
+
+        <div>
+          <h2 class="text-xl font-semibold text-gray-700 mb-4">Quick Select Lists</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button type="button" id="btnFortune500"
+              class="w-full px-4 py-3 bg-gray-100 text-gray-800 font-semibold rounded-lg shadow-sm hover:bg-indigo-100 transition duration-300 ease-in-out transform hover:-translate-y-1">
+              Fortune 500
+            </button>
+            <button type="button" id="btnTop100"
+              class="w-full px-4 py-3 bg-gray-100 text-gray-800 font-semibold rounded-lg shadow-sm hover:bg-indigo-100 transition duration-300 ease-in-out transform hover:-translate-y-1">
+              Top 100 US Stocks
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label for="stockSelector" class="block text-xl font-semibold text-gray-700 mb-4">
+            Or Select Manually
+          </label>
+          <select id="stockSelector" name="stocks" multiple class="w-full h-64 bg-white">
+            <option value="AAPL">Apple Inc.</option>
+            <option value="MSFT">Microsoft Corp.</option>
+            <option value="GOOGL">Alphabet Inc. (Google)</option>
+            <option value="AMZN">Amazon.com, Inc.</option>
+            <option value="NVDA">NVIDIA Corporation</option>
+            <option value="TSLA">Tesla, Inc.</option>
+            <option value="META">Meta Platforms, Inc.</option>
+            <option value="JPM">JPMorgan Chase & Co.</option>
+            <option value="JNJ">Johnson & Johnson</option>
+            <option value="V">Visa Inc.</option>
+            <option value="WMT">Walmart Inc.</option>
+            <option value="UNH">UnitedHealth Group Incorporated</option>
+            <option value="XOM">Exxon Mobil Corporation</option>
+            <option value="BRK-B">Berkshire Hathaway Inc.</option>
+          </select>
+        </div>
+
+        <div class="flex justify-center pt-6">
+          <button type="submit" class="px-10 py-4 bg-indigo-600 text-white font-bold rounded-lg shadow-md hover:bg-indigo-700
+                                focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75
+                                transition duration-300 ease-in-out transform hover:scale-105">
+            Run Analysis
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const fortune500Stocks = ['AAPL', 'MSFT', 'AMZN', 'NVDA', 'GOOGL']; // Example subset
+    const top100Stocks = ['AAPL', 'MSFT', 'TSLA']; // Example subset
+    const stockSelector = document.getElementById('stockSelector');
+
+    stockSelector.addEventListener('mousedown', function (event) {
+      event.preventDefault();
+      const option = event.target;
+      if (option.tagName === 'OPTION') {
+        option.selected = !option.selected;
+      }
+    });
+
+    document.getElementById('btnFortune500').addEventListener('click', () => {
+      selectStocks(fortune500Stocks);
+    });
+
+    document.getElementById('btnTop100').addEventListener('click', () => {
+      selectStocks(top100Stocks);
+    });
+
+    function selectStocks(stockList) {
+      for (let i = 0; i < stockSelector.options.length; i++) {
+        stockSelector.options[i].selected = false;
+      }
+      stockList.forEach(stockSymbol => {
+        const option = stockSelector.querySelector(`option[value="${stockSymbol}"]`);
+        if (option) {
+          option.selected = true;
+        }
+      });
+      stockSelector.dispatchEvent(new Event('change', {'bubbles': true}));
+    }
+  </script>
+</body>
+
+</html>

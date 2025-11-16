@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- THIS ENTIRE DOCUMENT IS AI GENERATED, I AM NOT A WEB DEVELOPER -->
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Define Stock Analysis Weights</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f4f8;
+      /* Light blue-gray background */
+    }
+
+    /* Custom styling for range input thumb */
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #4F46E5;
+      /* Indigo */
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.3);
+      /* Subtle glow */
+      margin-top: -8px;
+      /* Adjust thumb vertical position */
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: #4F46E5;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.3);
+    }
+  </style>
+</head>
+
+<body class="p-4 sm:p-8 flex items-center justify-center min-h-screen">
+  <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8 md:p-10 w-full max-w-2xl">
+    <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-6">
+      Customize Your Analysis
+    </h1>
+    <p class="text-center text-gray-600 mb-8 text-md sm:text-lg">
+      Adjust the weights (0-100) for each data point to define your unique stock analysis "spread."
+      Higher weights mean more influence on the prediction.
+    </p>
+
+    <form action="/finet/stock" method="POST" class="space-y-6">
+
+      <!-- Current Stock Data -->
+      <div class="bg-indigo-50 p-4 rounded-lg shadow-sm">
+        <h2 class="text-xl font-semibold text-indigo-700 mb-4">Current {{.Interval}} Price Action</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Weight for Current Open Price -->
+          <div>
+            <label for="weightCurrentOpen" class="block text-gray-700 text-sm font-medium mb-1">
+              Current {{.Interval}} Open Price Weight: <span id="valCurrentOpen"
+                class="font-bold text-indigo-600">50</span>
+            </label>
+            <input type="range" id="weightCurrentOpen" name="weightCurrentOpen" min="0" max="100" value="50"
+              class="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer"
+              oninput="document.getElementById('valCurrentOpen').innerText = this.value;">
+          </div>
+
+          <!-- Weight for Current High Price -->
+          <div>
+            <label for="weightCurrentHigh" class="block text-gray-700 text-sm font-medium mb-1">
+              Current {{.Interval}} High Price Weight: <span id="valCurrentHigh"
+                class="font-bold text-indigo-600">50</span>
+            </label>
+            <input type="range" id="weightCurrentHigh" name="weightCurrentHigh" min="0" max="100" value="50"
+              class="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer"
+              oninput="document.getElementById('valCurrentHigh').innerText = this.value;">
+          </div>
+
+          <!-- Weight for Current Low Price -->
+          <div>
+            <label for="weightCurrentLow" class="block text-gray-700 text-sm font-medium mb-1">
+              Current {{.Interval}} Low Price Weight: <span id="valCurrentLow"
+                class="font-bold text-indigo-600">50</span>
+            </label>
+            <input type="range" id="weightCurrentLow" name="weightCurrentLow" min="0" max="100" value="50"
+              class="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer"
+              oninput="document.getElementById('valCurrentLow').innerText = this.value;">
+          </div>
+
+          <!-- Weight for Current Close Price -->
+          <div>
+            <label for="weightCurrentClose" class="block text-gray-700 text-sm font-medium mb-1">
+              Current {{.Interval}} Close Price Weight: <span id="valCurrentClose"
+                class="font-bold text-indigo-600">50</span>
+            </label>
+            <input type="range" id="weightCurrentClose" name="weightCurrentClose" min="0" max="100" value="50"
+              class="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer"
+              oninput="document.getElementById('valCurrentClose').innerText = this.value;">
+          </div>
+
+          <!-- Weight for Current Volume -->
+          <div>
+            <label for="weightCurrentVolume" class="block text-gray-700 text-sm font-medium mb-1">
+              Current {{.Interval}} Volume Weight: <span id="valCurrentVolume"
+                class="font-bold text-indigo-600">50</span>
+            </label>
+            <input type="range" id="weightCurrentVolume" name="weightCurrentVolume" min="0" max="100" value="50"
+              class="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer"
+              oninput="document.getElementById('valCurrentVolume').innerText = this.value;">
+          </div>
+
+          <!-- Weight for Current Day (% Change) (Close vs Open) -->
+          <div>
+            <label for="weightCloseOpenPctChange" class="block text-gray-700 text-sm font-medium mb-1">
+              Current {{.Interval}} % Change (Close vs Open) Weight: <span id="valCloseOpenPctChange"
+                class="font-bold text-indigo-600">50</span>
+            </label>
+            <input type="range" id="weightCloseOpenPctChange" name="weightCloseOpenPctChange" min="0" max="100"
+              value="50" class="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer"
+              oninput="document.getElementById('valCloseOpenPctChange').innerText = this.value;">
+          </div>
+
+          <!-- Weight for Current Day (% Range) (High vs Low) -->
+          <div>
+            <label for="weightHighLowPctRange" class="block text-gray-700 text-sm font-medium mb-1">
+              Current {{.Interval}} % Range (High vs Low) Weight: <span id="valHighLowPctRange"
+                class="font-bold text-indigo-600">50</span>
+            </label>
+            <input type="range" id="weightHighLowPctRange" name="weightHighLowPctRange" min="0" max="100" value="50"
+              class="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer"
+              oninput="document.getElementById('valHighLowPctRange').innerText = this.value;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="flex justify-center pt-6">
+        <button type="submit" class="px-8 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75
+                           transition duration-300 ease-in-out transform hover:scale-105">
+          Run Analysis
+        </button>
+      </div>
+    </form>
+
+    <!-- Dynamic User Greeting (from Go handler) -->
+    {{if .UserData.Name}}
+    <p class="text-center text-gray-500 text-sm mt-8">
+      Currently logged in as: <span class="font-semibold text-gray-700">{{.UserData.Name}}</span>
+    </p>
+    {{end}}
+
+    <!-- Error Message Display -->
+    {{if .Error}}
+    <div class="mt-8 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md" role="alert">
+      <strong class="font-bold">Error:</strong>
+      <span class="block sm:inline">{{.Error}}</span>
+    </div>
+    {{end}}
+  </div>
+</body>
+
+</html>

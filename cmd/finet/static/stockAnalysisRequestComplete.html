@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analysis Results</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f4f8;
+      /* Light blue-gray background */
+    }
+  </style>
+</head>
+
+<body class="p-4 sm:p-8 flex items-center justify-center min-h-screen">
+  <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8 md:p-10 w-full max-w-2xl">
+    <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-6">
+      Your Analysis Configuration
+    </h1>
+    <p class="text-center text-gray-600 mb-8 text-md sm:text-lg">
+      Thanks for submitting your custom analysis parameters, <span
+        class="font-semibold text-indigo-700">{{.UserData.Name}}</span>!
+    </p>
+
+    <a href="/finet/predictions" class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700
+          focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75
+          transition duration-300 ease-in-out transform hover:scale-105">
+      View All Predictions
+    </a>
+  </div>
+
+  <!-- Error Message Display -->
+  {{if .Error}}
+  <div class="mt-8 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md" role="alert">
+    <strong class="font-bold">Error:</strong>
+    <span class="block sm:inline">{{.Error}}</span>
+  </div>
+  {{end}}
+  </div>
+</body>
+
+</html>
