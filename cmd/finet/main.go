@@ -1,17 +1,17 @@
 // FileSearchServer.go
 
-//testing git authentication
-
+// testing git authentication
 package main
 
 import (
 	"context"
 	"fmt"
-	"github.com/ethanjameslong1/FiNet/cmd/finet/handler"
-	"github.com/ethanjameslong1/FiNet/database"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/ethanjameslong1/FiNet/cmd/finet/handler"
+	"github.com/ethanjameslong1/FiNet/database"
 )
 
 func main() {
@@ -69,7 +69,7 @@ func main() {
 
 	mux.HandleFunc("POST /middleware", appHandler.Middleware)
 
-	//TEST this is just to ensure that once nginx is in place we can properly move analysis logic over. Functions are in loginhandler.go, just change the struct there to test whatever
+	// TEST this is just to ensure that once nginx is in place we can properly move analysis logic over. Functions are in loginhandler.go, just change the struct there to test whatever
 	mux.HandleFunc("GET /testapi", appHandler.TESTAPISTOCK)
 	mux.HandleFunc("POST /itemtest", appHandler.TESTAPISTOCKhandle)
 
@@ -77,5 +77,4 @@ func main() {
 	if err := http.ListenAndServe(":8000", mux); err != nil {
 		log.Fatal(err)
 	}
-
 }

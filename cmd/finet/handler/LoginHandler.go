@@ -1,3 +1,4 @@
+// Package handler functions for web server hosting
 package handler
 
 import (
@@ -5,13 +6,14 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"github.com/ethanjameslong1/FiNet/database"
-	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/ethanjameslong1/FiNet/database"
+	"github.com/google/uuid"
 )
 
 type contextKey string
@@ -135,7 +137,6 @@ type LoginRequest struct {
 }
 
 func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
-
 	var p LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&p)
 	if err != nil {
@@ -193,11 +194,9 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		"authToken": stringSessionId,
 		"username":  username,
 	})
-
 }
 
 func (h *Handler) ShowRegistration(w http.ResponseWriter, r *http.Request) {
-
 	_, ok := r.Context().Value(userContextKey).(database.User)
 	if ok {
 		http.Redirect(w, r, "/finet/stock", http.StatusSeeOther)
