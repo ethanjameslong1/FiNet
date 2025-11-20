@@ -17,6 +17,7 @@ func (h *Handler) Middleware(w http.ResponseWriter, r *http.Request) {
 	var p AuthRequest
 	err := json.NewDecoder(r.Body).Decode(&p)
 	if err != nil {
+		log.Print("DEBUG: middleware error decoding")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]string{
@@ -24,6 +25,8 @@ func (h *Handler) Middleware(w http.ResponseWriter, r *http.Request) {
 			"username":  "",
 		})
 	}
+
+	log.Printf("DEBUG: authToken: %s", p.Token)
 	sessionID := p.Token
 	session, dbErr := h.UserSessionDBService.GetSessionByID(r.Context(), sessionID)
 	if dbErr != nil {

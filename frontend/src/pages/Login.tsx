@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { Button } from "../components/Button";
+// import { Button } from "../components/Button";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -14,7 +14,7 @@ const LoginPage = () => {
     setError(null);
 
     try {
-      const response = await fetch("finet/login", {
+      const response = await fetch("/finet/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -102,7 +102,7 @@ const LoginPage = () => {
             </div>
           )}
 
-          <Button type="submit">Sign In</Button>
+          <button type="submit" className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Sign In</button>
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">

@@ -7,19 +7,20 @@ const UserHomepage = () => {
     const navigate = useNavigate();
     const [name, setName] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true); // Added for initial loading state
+    const [isLoading, setIsLoading] = useState(true);
 
-    // 1. Logic for validating the session
     const validateSession = async () => {
+        setError(null);
         const authToken = localStorage.getItem("authToken");
+        console.log("AuthToken: ", authToken)
 
         if (!authToken) {
-            navigate("/login"); // No token found, redirect immediately
+            navigate("/login");
             return;
         }
 
         try {
-            const response = await fetch("finet/Middleware", {
+            const response = await fetch("/finet/middleware", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -30,17 +31,15 @@ const UserHomepage = () => {
             const data = await response.json();
             
             if (!response.ok) {
-                // Token is invalid/expired according to the backend
                 localStorage.setItem("authToken", "");
                 localStorage.setItem("username", "");
+                console.log("response from middleware isn't okay")
                 setError(data.error || "Session validation failed.");
                 navigate("/login");
             } else { 
-                // SUCCESS case: Session is valid, update local storage with fresh data (if provided)
                 localStorage.setItem("authToken", data.authToken);
                 localStorage.setItem("username", data.username);
                 
-                // Set the name for display after successful validation
                 setName(data.username); 
             }
         } catch (err) {

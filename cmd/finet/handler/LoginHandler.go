@@ -164,6 +164,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessionID := uuid.New()
+	log.Printf("sessionId: ", sessionID)
 	_, err = h.UserSessionDBService.AddSession(r.Context(), sessionID, user.ID, h.SessionDuration)
 	if err != nil {
 		log.Printf("Error adding session for user '%s': %v", user.Username, err)
@@ -176,7 +177,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to create session", http.StatusInternalServerError)
 		return
 	}
-	stringSessionId := sessionID.String()
+	stringSessionID := sessionID.String()
 
 	// cookie := http.Cookie{
 	// 	Name:  "SessionCookie",
@@ -188,11 +189,12 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// }
 	// http.SetCookie(w, &cookie)
 
+	log.Printf("DEBUG: authToken in loginhandler: %s", stringSessionID)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{
-		"authToken": stringSessionId,
-		"username":  username,
+		"authToken": stringSessionID,
+		"username":  user.Username,
 	})
 }
 
