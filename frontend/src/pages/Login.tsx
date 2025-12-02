@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import type { FormEvent } from "react";
 // import { Button } from "../components/Button";
@@ -107,12 +107,12 @@ const LoginPage = () => {
 
         <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
           Don&apos;t have an account?{" "}
-          <Link
-            to="/register"
-            className="text-blue-600 hover:underline dark:text-blue-400"
-          >
-            Register
-          </Link>
+<a 
+  href="/finet/register" 
+  className="text-blue-600 hover:underline dark:text-blue-400"
+>
+  Register
+</a>
         </p>
       </div>
     </div>

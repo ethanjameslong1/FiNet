@@ -3,16 +3,19 @@ package analysis
 import (
 	"errors"
 	"fmt"
-	"gonum.org/v1/gonum/stat"
 	"log"
 	"strconv"
 	"sync"
 	"time"
+
+	"gonum.org/v1/gonum/stat"
 )
 
 // Test Values
-var AlphaVantageSymbols = []string{"MSFT", "GOOG", "TSLA", "AMZN"}
-var ErrLookbackLimitReached = errors.New("lookback limit reached")
+var (
+	AlphaVantageSymbols     = []string{"MSFT", "GOOG", "TSLA", "AMZN"}
+	ErrLookbackLimitReached = errors.New("lookback limit reached")
+)
 
 const (
 	lookBackTimeYear = 10
@@ -53,7 +56,7 @@ func StoreWeeklyDataV1(d []*StockDataWeekly, startDate string, lookBackTime int)
 	ch := make(chan RelationshipPackage)
 
 	collectorwg.Add(1)
-	//COLLECTOR FUNC *********************************************************************
+	// COLLECTOR FUNC *********************************************************************
 	go func(ch <-chan RelationshipPackage) {
 		defer collectorwg.Done()
 
@@ -65,9 +68,9 @@ func StoreWeeklyDataV1(d []*StockDataWeekly, startDate string, lookBackTime int)
 		}
 		fmt.Println("Collector: Channel closed, no more relationships to process.")
 	}(ch)
-	//COLLECTOR FUNC END *****************************************************************
+	// COLLECTOR FUNC END *****************************************************************
 
-	//DATE SETUP **********************************************************************
+	// DATE SETUP **********************************************************************
 	var OriginalFriday string
 	if startDate == "" {
 		egFriday := findMostRecentFriday()
@@ -80,22 +83,22 @@ func StoreWeeklyDataV1(d []*StockDataWeekly, startDate string, lookBackTime int)
 		}
 		OriginalFriday = egFriday
 	}
-	//DATE SETUP **********************************************************************
+	// DATE SETUP **********************************************************************
 
 	for sym := range symbolDataMap {
 		if sym == "" {
 			continue
 		}
-		wg.Add(1) //for every symbol spawn a seperate thread to analysis it for predictors
+		wg.Add(1) // for every symbol spawn a seperate thread to analysis it for predictors
 		go func(ch chan<- RelationshipPackage, sym string, stockMap map[string]*StockDataWeekly, originalDate2 string, yearsBack int) {
 			defer wg.Done()
 
-			//Helper variables to be accessed during the main loop*****************************
+			// Helper variables to be accessed during the main loop*****************************
 			tooFarFlag := false
-			currentDate := originalDate2 //establish currentDate as the original date to go back from
-			//Helper variables to be accessed during the main loop*****************************
+			currentDate := originalDate2 // establish currentDate as the original date to go back from
+			// Helper variables to be accessed during the main loop*****************************
 
-			for !tooFarFlag { //for every week that it can this loop will reference every other symbol and try and relate it to the main predictable symbol (sym), will be multithread as well
+			for !tooFarFlag { // for every week that it can this loop will reference every other symbol and try and relate it to the main predictable symbol (sym), will be multithread as well
 				laterDate := currentDate
 				olderDate, err := findPreviousWeekString(originalDate2, currentDate, yearsBack)
 				if err != nil {

@@ -95,14 +95,14 @@ useEffect(() => {
                     hoverScale
                 />
 
-                <Card
-                    title="Portfolio Management"
-                    description="Manage your investment portfolio with our intuitive tools and insights."
-                    buttonText="Optimize Portfolio"
-                    buttonTo="/portfolio"
-                    hoverScale
-                />
-            </div>
+            {/*     <Card */}
+            {/*         title="Portfolio Management" */}
+            {/*         description="Manage your investment portfolio with our intuitive tools and insights." */}
+            {/*         buttonText="Optimize Portfolio" */}
+            {/*         buttonTo="/portfolio" */}
+            {/*         hoverScale */}
+            {/*     /> */}
+            {/* </div> */}
         </Layout>
     );
 };

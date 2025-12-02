@@ -33,7 +33,7 @@ func main() {
 		defer ticker.Stop()
 		for {
 			select {
-			case <-ctx.Done(): // Listen for app shutdown signal
+			case <-ctx.Done():
 				log.Println("Session cleanup goroutine stopping.")
 				return
 			case <-ticker.C:
@@ -58,20 +58,15 @@ func main() {
 	mux.Handle("/", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RootHandler)))
 	mux.HandleFunc("POST /login", appHandler.LoginHandler)
 	mux.Handle("GET /homepage", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.HomepageHandler)))
-	mux.HandleFunc("GET /stock", http.HandlerFunc(appHandler.StockRequestPageHandler))
-	mux.HandleFunc("POST /stock", http.HandlerFunc(appHandler.StockRequestHandler))
+	mux.Handle("GET /stock", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.StockRequestPageHandler)))
+	mux.Handle("POST /stock", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.StockRequestHandler)))
 	mux.HandleFunc("GET /register", appHandler.ShowRegistration)
 	mux.HandleFunc("POST /register", appHandler.RegistrationHandler)
 	mux.Handle("GET /predictions", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.ShowPredictionsHandler))) // PROD: requires sessionManagement, not removing middleware
-	mux.HandleFunc("GET /rawdata", appHandler.RawDataRequest)
-	mux.HandleFunc("POST /rawdata", appHandler.RawDataHandler)
+	mux.Handle("GET /rawdata", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RawDataRequest)))
+	mux.Handle("POST /rawdata", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RawDataHandler)))
 	mux.HandleFunc("GET /logout", appHandler.LogoutHandler)
-
 	mux.HandleFunc("POST /middleware", appHandler.Middleware)
-
-	// TEST this is just to ensure that once nginx is in place we can properly move analysis logic over. Functions are in loginhandler.go, just change the struct there to test whatever
-	mux.HandleFunc("GET /testapi", appHandler.TESTAPISTOCK)
-	mux.HandleFunc("POST /itemtest", appHandler.TESTAPISTOCKhandle)
 
 	fmt.Printf("PROD: finet port running on app_network: finet:8000/\n")
 	if err := http.ListenAndServe(":8000", mux); err != nil {

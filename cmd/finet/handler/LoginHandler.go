@@ -52,7 +52,7 @@ type testItem struct {
 	Name string `json:"name"`
 }
 
-var stockAPIURL = "http://analysis:8001/item"
+var stockAPIURL = "http://analysis:8001/rawDataRequest"
 
 func (h *Handler) TESTAPISTOCKhandle(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -164,7 +164,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessionID := uuid.New()
-	log.Printf("sessionId: ", sessionID)
+	log.Printf("sessionId: %s", sessionID.String())
 	_, err = h.UserSessionDBService.AddSession(r.Context(), sessionID, user.ID, h.SessionDuration)
 	if err != nil {
 		log.Printf("Error adding session for user '%s': %v", user.Username, err)
@@ -179,15 +179,15 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	stringSessionID := sessionID.String()
 
-	// cookie := http.Cookie{
-	// 	Name:  "SessionCookie",
-	// 	Value: sessionID.String(), Path: "/finet/",
-	// 	Expires:  time.Now().Add(h.SessionDuration),
-	// 	HttpOnly: true,
-	// 	Secure:   true,
-	// 	SameSite: http.SameSiteLaxMode,
-	// }
-	// http.SetCookie(w, &cookie)
+	cookie := http.Cookie{
+		Name:  "SessionCookie",
+		Value: sessionID.String(), Path: "/finet/",
+		Expires:  time.Now().Add(h.SessionDuration),
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+	}
+	http.SetCookie(w, &cookie)
 
 	log.Printf("DEBUG: authToken in loginhandler: %s", stringSessionID)
 	w.Header().Set("Content-Type", "application/json")
@@ -199,12 +199,6 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ShowRegistration(w http.ResponseWriter, r *http.Request) {
-	_, ok := r.Context().Value(userContextKey).(database.User)
-	if ok {
-		http.Redirect(w, r, "/finet/stock", http.StatusSeeOther)
-		return
-	}
-
 	tmpl, err := template.ParseFiles("static/registration.html")
 	if err != nil {
 		log.Printf("Error parsing registration template: %v", err)
@@ -223,8 +217,22 @@ func (h *Handler) RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		log.Printf("Error parsing form: %v", err)
 		http.Error(w, "Bad request", http.StatusBadRequest)
+
+		tmpl, err := template.ParseFiles("static/registration.html")
+		if err != nil {
+			log.Printf("Error parsing registration template: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+		err = tmpl.Execute(w, PageData{})
+		if err != nil {
+			log.Printf("Error executing registration template: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
 		return
 	}
+
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 
@@ -232,18 +240,49 @@ func (h *Handler) RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Username or password cannot be empty", http.StatusBadRequest)
 		return
 	}
+	_, err := h.UserSessionDBService.GetUserByName(r.Context(), username)
+	if err == nil {
+		log.Printf("user %s exists already", username)
+		http.Error(w, "username taken", http.StatusConflict)
+		tmpl, err := template.ParseFiles("static/registration.html")
+		if err != nil {
+			log.Printf("Error parsing registration template: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+		err = tmpl.Execute(w, PageData{})
+		if err != nil {
+			log.Printf("Error executing registration template: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+		return
+	}
 
-	succuess, err := h.UserSessionDBService.AddUser(r.Context(), username, password)
-	if err != nil || !succuess {
+	success, err := h.UserSessionDBService.AddUser(r.Context(), username, password)
+	if err != nil || !success {
 		log.Printf("Register attempt failed for user '%s': %v", username, err)
 		http.Error(w, "Register failed due to a server error", http.StatusInternalServerError)
+		tmpl, err := template.ParseFiles("static/registration.html")
+		if err != nil {
+			log.Printf("Error parsing registration template: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+		err = tmpl.Execute(w, PageData{})
+		if err != nil {
+			log.Printf("Error executing registration template: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 	_, err = h.UserSessionDBService.GetUserByName(r.Context(), username)
 	if err != nil {
 		log.Printf("Error finding recently added user %s: %v", username, err)
 		http.Error(w, "Failed to find recently added user", http.StatusInternalServerError)
+		h.ShowRegistration(w, r)
 		return
 	}
-	http.Redirect(w, r, "/finet/login", http.StatusSeeOther)
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

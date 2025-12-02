@@ -1,7 +1,5 @@
 filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
 filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
-github.com/ethanjameslong1/FiNet/cmd/stock v0.0.0-20250924191349-3cbc22149d35 h1:tmhe11a4/Ezh/2U6aT7bq1D19taWezgdIkrsfki2otU=
-github.com/ethanjameslong1/FiNet/cmd/stock v0.0.0-20250924191349-3cbc22149d35/go.mod h1:LRWpPL/mI0VP8cxZL1J7oasVVXzkpplaSasMT/ORqW4=
 github.com/ethanjameslong1/FiNet/database v0.0.0-20250924190103-a1db73b4bfa1 h1:hPmMNtoym88+HS/6YsHSD/txuzpm7PZRnXGBmoYpTI4=
 github.com/ethanjameslong1/FiNet/database v0.0.0-20250924190103-a1db73b4bfa1/go.mod h1:vkG1VX+qp127jTsS7CJM3Mq9F+MyNHHa4ZqezqFsSOA=
 github.com/go-sql-driver/mysql v1.9.3 h1:U/N249h2WzJ3Ukj8SowVFjdtZKfu9vlLZxjPXV1aweo=
@@ -10,5 +8,3 @@ github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 golang.org/x/crypto v0.42.0 h1:chiH31gIWm57EkTXpwnqf8qeuMUi0yekh6mT2AvFlqI=
 golang.org/x/crypto v0.42.0/go.mod h1:4+rDnOTJhQCx2q7/j6rAN5XDw8kPjeaXEUR2eL94ix8=
-gonum.org/v1/gonum v0.16.0 h1:5+ul4Swaf3ESvrOnidPp4GZbzf0mxVQpDCYUQE7OJfk=
-gonum.org/v1/gonum v0.16.0/go.mod h1:fef3am4MQ93R2HHpKnLk4/Tbh/s0+wqD5nfa6Pnwy4E=

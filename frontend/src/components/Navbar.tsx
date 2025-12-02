@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import Logout from "../pages/Logout";
+import Logout from "../pages/LogoutButton";
 
 interface NavbarProps {
   username?: string; // optional display name

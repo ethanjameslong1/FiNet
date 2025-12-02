@@ -1,7 +1,7 @@
 package analysis
 
-//imports... obvi
-//checking github correctness
+// imports... obvi
+// checking github correctness
 import (
 	"context"
 	"encoding/json"
@@ -80,30 +80,30 @@ type StockWeights struct {
 type AlphaVantageParam struct {
 	Function     string
 	Symbol       string
-	Datatype     string //defaults to JSON, i don't think csv will ever come into play
+	Datatype     string // defaults to JSON, i don't think csv will ever come into play
 	APIKey       string
-	StartDate    string //for internal use, not a parameter
-	EndDate      string //for internal use, not a parameter
+	StartDate    time.Time // for internal use, not a parameter
+	EndDate      time.Time // for internal use, not a parameter
 	StockWeights StockWeights
 }
 
 func RetrieveStockDataWeekly(ctx context.Context, params AlphaVantageParam) (*StockDataWeekly, error) {
-	if params.Function != "TIME_SERIES_WEEKLY_ADJUSTED" || params.Symbol == "" || params.APIKey == "" {
-		return nil, fmt.Errorf("Required params are missing or wrong")
+	if params.Function != "TIME_SERIES_WEEKLY_ADJUSTED" || params.Symbol == "" || params.APIKey == "" { // TODO: make api key environment, add monthly function support
+		return nil, fmt.Errorf("required params are missing or wrong")
 	}
 	if params.Datatype == "" {
 		params.Datatype = "json"
 	}
-	apiRequestUrl := fmt.Sprintf(ApiURL, params.Function, params.Symbol, params.APIKey)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiRequestUrl, nil)
+	apiRequestURL := fmt.Sprintf(ApiURL, params.Function, params.Symbol, params.APIKey)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiRequestURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create request: %w", err)
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 	typeAccepting := fmt.Sprintf("application/%v", params.Datatype)
 	req.Header.Set("Accept", typeAccepting)
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Error sending request: %w", err)
+		return nil, fmt.Errorf("error sending request: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -113,18 +113,62 @@ func RetrieveStockDataWeekly(ctx context.Context, params AlphaVantageParam) (*St
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading response body: %w", err)
+		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
 	var stockData StockDataWeekly
 	err = json.Unmarshal(body, &stockData)
 	if err != nil {
-		return nil, fmt.Errorf("Error unmarshalling response: %w", err)
+		return nil, fmt.Errorf("error unmarshalling response: %w", err)
+	}
+	if params.StartDate.IsZero() && params.EndDate.IsZero() {
+		return &stockData, nil
+	}
+	if params.StartDate.IsZero() {
+		params.StartDate, err = time.Parse(dateFormat, "2001-01-01")
+		if err != nil {
+			return nil, fmt.Errorf("internal Server Error: DateFormat: %v", err)
+		}
+
+	}
+	if params.EndDate.IsZero() {
+		params.EndDate, err = time.Parse(dateFormat, findMostRecentFriday())
+		if err != nil {
+			return nil, fmt.Errorf("internal Server Error: DateFormat: %v", err)
+		}
+	}
+	for dateStr := range stockData.TimeSeriesWeekly {
+		recordDate, err := time.Parse(dateFormat, dateStr)
+		if err != nil {
+			continue
+		}
+		if recordDate.Before(params.StartDate) || recordDate.After(params.EndDate) {
+			delete(stockData.TimeSeriesWeekly, dateStr)
+		}
 	}
 	return &stockData, nil
 }
 
-func MakeWeeklyDataSlice(ctx context.Context, symbols []string) ([]*StockDataWeekly, error) {
-	paramTemplate := AlphaVantageParam{Function: WeeklyAdjustedFunction, APIKey: ApiKey}
+func MakeWeeklyDataSlice(ctx context.Context, symbols []string, timePer string) ([]*StockDataWeekly, error) {
+	var startDate time.Time
+	endDate := time.Now()
+
+	switch timePer {
+	case "1mo":
+		startDate = endDate.AddDate(0, -1, 0)
+	case "3mo":
+		startDate = endDate.AddDate(0, -3, 0)
+	case "6mo":
+		startDate = endDate.AddDate(0, -6, 0)
+	case "1y":
+		startDate = endDate.AddDate(-1, 0, 0)
+	case "5y":
+		startDate = endDate.AddDate(-5, 0, 0)
+	case "max":
+	default:
+		startDate = endDate.AddDate(0, -6, 0)
+	}
+
+	paramTemplate := AlphaVantageParam{Function: WeeklyAdjustedFunction, APIKey: ApiKey, StartDate: startDate, EndDate: endDate}
 	dataSlice := make([]*StockDataWeekly, len(symbols))
 	var allErrors []error
 	var err error
@@ -135,7 +179,28 @@ func MakeWeeklyDataSlice(ctx context.Context, symbols []string) ([]*StockDataWee
 			log.Printf("Error retrieving stock data for symbol %q: %v", s, err)
 			allErrors = append(allErrors, fmt.Errorf("symbol %q: %w", s, err))
 			if len(allErrors) > 3 {
-				return nil, fmt.Errorf("Too many failed API calls, check symbols list and API. atleast 9 failed API calls")
+				return nil, fmt.Errorf("too many failed API calls, check symbols list and API. atleast 3 failed API calls")
+			}
+			continue
+		}
+	}
+	return dataSlice, nil
+}
+
+func AnalysisStoreWeeklyDataSlice(ctx context.Context, symbols []string) ([]*StockDataWeekly, error) {
+	paramTemplate := AlphaVantageParam{Function: WeeklyAdjustedFunction, APIKey: ApiKey}
+	dataSlice := make([]*StockDataWeekly, len(symbols))
+	var allErrors []error
+	var err error
+	log.Printf("AnalysisStoreWeeklyDataSlice: paramTemplate: %v", paramTemplate)
+	for i, s := range symbols {
+		paramTemplate.Symbol = s
+		dataSlice[i], err = RetrieveStockDataWeekly(ctx, paramTemplate)
+		if err != nil {
+			log.Printf("Error retrieving stock data for symbol %q: %v", s, err)
+			allErrors = append(allErrors, fmt.Errorf("symbol %q: %w", s, err))
+			if len(allErrors) > 3 {
+				return nil, fmt.Errorf("too many failed API calls, check symbols list and API. atleast 3 failed API calls")
 			}
 			continue
 		}

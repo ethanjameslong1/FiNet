@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"log"
+	"time"
+
 	"github.com/ethanjameslong1/FiNet/cmd/stock/handler"
 	"github.com/ethanjameslong1/FiNet/database"
 	"github.com/gin-gonic/gin"
-	"log"
-	"time"
 )
 
 const (
@@ -14,7 +15,6 @@ const (
 )
 
 func main() {
-
 	router := gin.Default()
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()
@@ -29,8 +29,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//TEST this is just to see if the 2 containers can communicate, the function is in requestHandler.go. In ../finet/main.go there is more info
-	router.POST("/analysis/item", stockHandler.ReceiveAPIcall)
+	router.POST("/rawDataRequest", stockHandler.RawDataAPIRequest)
+	router.POST("/analysisRequest", stockHandler.AnalysisAPIRequest)
 
 	router.Run(":8001")
 }

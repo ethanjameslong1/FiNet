@@ -83,7 +83,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 				http.Error(w, "Bad Request", http.StatusBadRequest)
 				return
 			}
-			http.Redirect(w, r, "/finet/login", http.StatusFound)
+			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
 
@@ -100,7 +100,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 				Secure:   true,
 				SameSite: http.SameSiteLaxMode,
 			})
-			http.Redirect(w, r, "/finet/login", http.StatusFound)
+			http.Redirect(w, r, "/", http.StatusNotFound)
 			return
 		}
 
@@ -124,7 +124,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 				Secure:   true,
 				SameSite: http.SameSiteLaxMode,
 			})
-			http.Redirect(w, r, "/finet/login", http.StatusFound)
+			http.Redirect(w, r, "/", http.StatusUnauthorized)
 			return
 		}
 
@@ -133,7 +133,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 			log.Printf("AuthMiddleware: Failed to get user details for user ID '%d': %v", session.UserID, userErr)
 			http.SetCookie(w, &http.Cookie{Name: "SessionCookie", Value: "", Path: "/finet/", Expires: time.Unix(0, 0), HttpOnly: true, Secure: true, SameSite: http.SameSiteLaxMode})
 			http.Error(w, "Authentication error", http.StatusInternalServerError)
-			http.Redirect(w, r, "/finet/login", http.StatusFound)
+			http.Redirect(w, r, "/", http.StatusUnauthorized)
 			return
 		}
 

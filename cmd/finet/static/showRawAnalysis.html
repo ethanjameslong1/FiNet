@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Historical Data for {{.Symbol}}</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -41,13 +43,64 @@
         Showing data for the past {{.Period}}
       </p>
 
-      <div class="mb-10 p-4 border rounded-lg bg-gray-50 text-center text-gray-400">
-        A chart visualization of the stock data will be displayed here.
+      <!-- Chart Container -->
+      <div class="mb-10 p-4 border rounded-lg bg-white h-96 relative">
+        <canvas id="stockChart"></canvas>
+      </div>
+
+              <div class="mt-6 mb-8 bg-indigo-50 border border-indigo-100 rounded-lg p-6">
+        <h3 class="text-indigo-900 font-semibold mb-3">Update Chart Parameters</h3>
+        <form action="/finet/rawdata" method="POST" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+            
+            <!-- Ticker Selection -->
+            <div class="md:col-span-5">
+                <label for="update-ticker" class="block text-sm font-medium text-indigo-700 mb-1">Stock Symbol</label>
+                <select id="update-ticker" name="stockSymbol" required
+                    class="w-full bg-white border border-indigo-200 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="" disabled>Change Stock...</option>
+                    <option value="AAPL" {{if eq .Symbol "AAPL"}}selected{{end}}>Apple Inc. (AAPL)</option>
+                    <option value="MSFT" {{if eq .Symbol "MSFT"}}selected{{end}}>Microsoft (MSFT)</option>
+                    <option value="GOOGL" {{if eq .Symbol "GOOGL"}}selected{{end}}>Google (GOOGL)</option>
+                    <option value="AMZN" {{if eq .Symbol "AMZN"}}selected{{end}}>Amazon (AMZN)</option>
+                    <option value="NVDA" {{if eq .Symbol "NVDA"}}selected{{end}}>NVIDIA (NVDA)</option>
+                    <option value="TSLA" {{if eq .Symbol "TSLA"}}selected{{end}}>Tesla (TSLA)</option>
+                    <option value="META" {{if eq .Symbol "META"}}selected{{end}}>Meta (META)</option>
+                    <option value="JPM" {{if eq .Symbol "JPM"}}selected{{end}}>JPMorgan (JPM)</option>
+                    <option value="JNJ" {{if eq .Symbol "JNJ"}}selected{{end}}>Johnson & Johnson (JNJ)</option>
+                    <option value="V" {{if eq .Symbol "V"}}selected{{end}}>Visa (V)</option>
+                    <option value="WMT" {{if eq .Symbol "WMT"}}selected{{end}}>Walmart (WMT)</option>
+                    <option value="UNH" {{if eq .Symbol "UNH"}}selected{{end}}>UnitedHealth (UNH)</option>
+                    <option value="XOM" {{if eq .Symbol "XOM"}}selected{{end}}>Exxon Mobil (XOM)</option>
+                    <option value="BRK-B" {{if eq .Symbol "BRK-B"}}selected{{end}}>Berkshire Hathaway (BRK-B)</option>
+                </select>
+            </div>
+
+            <!-- Period Selection -->
+            <div class="md:col-span-4">
+                <label for="update-period" class="block text-sm font-medium text-indigo-700 mb-1">Time Period</label>
+                <select id="update-period" name="period" required
+                    class="w-full bg-white border border-indigo-200 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="1mo" {{if eq .Period "1mo"}}selected{{end}}>1 Month</option>
+                    <option value="3mo" {{if eq .Period "3mo"}}selected{{end}}>3 Months</option>
+                    <option value="6mo" {{if eq .Period "6mo"}}selected{{end}}>6 Months</option>
+                    <option value="1y" {{if eq .Period "1y"}}selected{{end}}>1 Year</option>
+                    <option value="5y" {{if eq .Period "5y"}}selected{{end}}>5 Years</option>
+                    <option value="max" {{if eq .Period "max"}}selected{{end}}>Maximum</option>
+                </select>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="md:col-span-3">
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">
+                    Update View
+                </button>
+            </div>
+        </form>
       </div>
 
       <h2 class="text-2xl font-semibold text-gray-700 mb-4">Raw Data</h2>
       <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-        <table class="w-full text-sm text-left text-gray-500">
+        <table id="stockTable" class="w-full text-sm text-left text-gray-500">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
               <th scope="col" class="px-6 py-3">Date</th>
@@ -58,24 +111,25 @@
               <th scope="col" class="px-6 py-3">Volume</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="tableBody">
+            <!-- Go Template Rendering -->
             {{range .Data}}
             {{range $date, $values := .TimeSeriesWeekly}}
-            <tr class="bg-white border-b hover:bg-gray-50">
-              <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+            <tr class="bg-white border-b hover:bg-gray-50 data-row">
+              <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap date-cell">
                 {{$date}}
               </th>
               <td class="px-6 py-4">{{$values.Open}}</td>
               <td class="px-6 py-4">{{$values.High}}</td>
               <td class="px-6 py-4">{{$values.Low}}</td>
-              <td class="px-6 py-4">{{$values.Close}}</td>
+              <td class="px-6 py-4 close-cell">{{$values.Close}}</td>
               <td class="px-6 py-4">{{$values.Volume}}</td>
             </tr>
             {{end}}
             {{end}}
           </tbody>
         </table>
-        {{if not .StockData}}
+        {{if not .Data}}
         <div class="text-center p-10 bg-white border-b">
           <p class="text-gray-500">No data available for the selected stock and period.</p>
         </div>
@@ -84,6 +138,99 @@
     </div>
   </main>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const tableBody = document.getElementById('tableBody');
+      // Get all rows rendered by Go
+      const rows = Array.from(tableBody.querySelectorAll('tr.data-row'));
+
+      if (rows.length === 0) return;
+
+      // Extract data from the DOM
+      // We map the rows to an object containing the raw date, the price, and the DOM element itself
+      const parsedData = rows.map(row => {
+        const dateText = row.querySelector('.date-cell').innerText.trim();
+        const closeText = row.querySelector('.close-cell').innerText.trim();
+        return {
+          date: new Date(dateText),
+          dateStr: dateText,
+          close: parseFloat(closeText),
+          element: row
+        };
+      });
+
+      // 1. SORT TABLE: Descending (Newest -> Oldest)
+      // Since Go ranges over maps randomly, this JS ensures the table is always consistent
+      parsedData.sort((a, b) => b.date - a.date);
+
+      // Clear existing rows and append sorted rows
+      tableBody.innerHTML = '';
+      parsedData.forEach(item => {
+        tableBody.appendChild(item.element);
+      });
+
+      // 2. PREPARE CHART: Ascending (Oldest -> Newest)
+      // Charts usually read Left to Right (Time progression)
+      const chartData = [...parsedData].sort((a, b) => a.date - b.date);
+
+      const labels = chartData.map(d => d.dateStr);
+      const prices = chartData.map(d => d.close);
+
+      // 3. RENDER CHART
+      const ctx = document.getElementById('stockChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Closing Price',
+            data: prices,
+            borderColor: '#9333ea', // Tailwind Purple-600
+            backgroundColor: 'rgba(147, 51, 234, 0.1)',
+            borderWidth: 2,
+            pointRadius: 3,
+            pointHoverRadius: 6,
+            fill: true,
+            tension: 0.1 // Slight curve
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+            }
+          },
+          interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
+          },
+          scales: {
+            x: {
+              display: true,
+              title: {
+                display: true,
+                text: 'Date'
+              }
+            },
+            y: {
+              display: true,
+              title: {
+                display: true,
+                text: 'Price (USD)'
+              }
+            }
+          }
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>

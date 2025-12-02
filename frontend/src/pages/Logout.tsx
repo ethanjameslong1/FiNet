@@ -1,11 +1,21 @@
-import { Button } from "../components/Button";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Logout = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("username");
+
+    setTimeout(() => {
+      navigate("/");
+    }, 100);
+  }, [navigate]);
+
   return (
-    <div>
-      <Button to="/logout" type="submit">
-        Logout
-      </Button>
+    <div className="flex items-center justify-center h-screen">
+      <p>Logging out safely...</p>
     </div>
   );
 };
