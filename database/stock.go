@@ -13,6 +13,7 @@ const (
 	SQL_SELECT_ALL_PREDICTIONS      string = `SELECT id, predictable_symbol, predictor_symbol, correlation, prediction_model FROM prediction`
 	SQL_SELECT_PREDICTIONS_FOR_USER string = `SELECT id, predictable_symbol, predictor_symbol, correlation, prediction_model FROM prediction WHERE user_id = ?`
 	SQL_SELECT_PREDICTION_MODEL     string = `SELECT id FROM prediction_models WHERE model_name = ?`
+	SQL_REMOVE_PREDICTIONS_FOR_USER string = `REMOVE * FROM prediction WHERE user_id = ?`
 )
 
 type Prediction struct {
@@ -68,25 +69,10 @@ func (s *DBService) GetAllPredictions(ctx context.Context) ([]Prediction, error)
 	return predictions, nil
 }
 
-func (s *DBService) RemoveAllPredictionsForUser(ctx context.Context, userID int) ([]Prediction, error) {
-	rows, err := s.db.QueryContext(ctx, SQL_SELECT_PREDICTIONS_FOR_USER, userID)
+func (s *DBService) RemoveAllPredictionsForUser(ctx context.Context, userID int) error {
+	_, err := s.db.ExecContext(ctx, SQL_REMOVE_PREDICTIONS_FOR_USER, userID)
 	if err != nil {
-		return nil, fmt.Errorf("error querying for all predictions: %w", err)
+		return fmt.Errorf("error removing all predictions: %w", err)
 	}
-	defer rows.Close()
-
-	var predictions []Prediction
-	for rows.Next() {
-		var p Prediction
-		if err := rows.Scan(&p.ID, &p.PredictableSymbol, &p.PredictorSymbol, &p.Correlation, &p.ModelID); err != nil {
-			return nil, fmt.Errorf("error scanning prediction row: %w", err)
-		}
-		predictions = append(predictions, p)
-	}
-	err = rows.Err()
-	if err != nil {
-		return nil, fmt.Errorf("error after iterating prediction rows: %w", err)
-	}
-
-	return predictions, nil
+	return nil
 }
