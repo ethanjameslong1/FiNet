@@ -95,14 +95,16 @@ useEffect(() => {
                     hoverScale
                 />
 
-            {/*     <Card */}
-            {/*         title="Portfolio Management" */}
-            {/*         description="Manage your investment portfolio with our intuitive tools and insights." */}
-            {/*         buttonText="Optimize Portfolio" */}
-            {/*         buttonTo="/portfolio" */}
-            {/*         hoverScale */}
-            {/*     /> */}
-            {/* </div> */}
+                <Card
+                    title="View Collected Data"
+                    description="View Analyzed stock data"
+                    buttonText="View Predictions"
+                    onClick={() => {
+                        window.location.href = "/finet/predictions";
+                    }}
+                    hoverScale
+                />
+            </div>
         </Layout>
     );
 };

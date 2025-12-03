@@ -7,7 +7,6 @@ import Login from "./pages/Login.tsx";
 import Logout from "./pages/Logout.tsx";
 import UserHomepage from "./pages/Home.tsx";
 import Register from "./pages/Register.tsx";
-import Portfolio from "./features/optimizer/Portfolio.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

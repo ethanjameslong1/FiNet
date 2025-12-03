@@ -325,3 +325,18 @@ func (h *Handler) callForAnalysis(w http.ResponseWriter, r *http.Request, symbol
 
 	return nil
 }
+
+func (h *Handler) ClearPredictions(w http.ResponseWriter, r *http.Request) {
+	user, ok := r.Context().Value(userContextKey).(database.User)
+	if !ok {
+		log.Printf("Error: User not found in context for StockHandler. Redirecting to login.")
+		http.Redirect(w, r, "/", http.StatusNotFound)
+		return
+	}
+	err := h.StockDBService.RemoveAllPredictionsForUser(r.Context(), user.ID)
+	if err != nil {
+		log.Printf("Error removing all predictions: %v", err)
+		http.Redirect(w, r, "/", http.StatusInternalServerError)
+	}
+	http.Redirect(w, r, "/finet/predictions", http.StatusFound)
+}

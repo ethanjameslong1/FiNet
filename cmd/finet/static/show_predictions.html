@@ -9,6 +9,22 @@
 </head>
 
 <body class="bg-gray-100 p-8">
+  <header class="bg-white shadow-md">
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="/home" class="text-2xl font-bold text-purple-600">Finet</a>
+      <div class="flex items-center space-x-4">
+        <a href="/home"
+          class="bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition duration-300">
+          Home
+        </a>
+        <a href="/finet/logout"
+          class="bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition duration-300">
+          Logout
+        </a>
+      </div>
+    </nav>
+  </header>
+
   <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
     <h1 class="text-3xl font-bold text-gray-800 mb-6">All Stored Predictions</h1>
 
@@ -43,8 +59,14 @@
       <a href="/finet/stock" class="px-8 py-3 bg-indigo-600 text-white font-bold rounded-lg shadow-md hover:bg-indigo-700
           focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75
           transition duration-300 ease-in-out transform hover:scale-105">
-        Back to Analysis
+        New Analysis
       </a>
+      <a href="/finet/clearpredictions" class="px-8 py-3 bg-indigo-600 text-white font-bold rounded-lg shadow-md hover:bg-indigo-700
+          focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75
+          transition duration-300 ease-in-out transform hover:scale-105">
+        Clear Predictions
+      </a>
+
     </div>
   </div>
 </body>

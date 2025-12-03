@@ -7,6 +7,7 @@ toolchain go1.24.7
 require (
 	github.com/ethanjameslong1/FiNet/database v0.0.0-20250930190400-a106d3ee87fa
 	github.com/gin-gonic/gin v1.11.0
+	github.com/joho/godotenv v1.5.1
 	gonum.org/v1/gonum v0.16.0
 )
 

@@ -69,6 +69,7 @@ services:
       DB_STOCK_PREDICTION_HOST: stock_prediction_db
       DB_STOCK_PREDICTION_PORT: 3306
       DB_STOCK_PREDICTION_NAME: stock_prediction_db
+      API_KEY: ${API_KEY}
     networks:
       - app_network
     depends_on:

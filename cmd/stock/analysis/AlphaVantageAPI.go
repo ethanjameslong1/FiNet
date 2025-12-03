@@ -9,13 +9,14 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
 // global constants
 const (
-	ApiKey                  = "FTMAJAOUIWD2Z7L9"
-	ApiURL                  = "https://www.alphavantage.co/query?function=%v&symbol=%v&apikey=%v"
+	APIKeyEnvValue          = "API_KEY"
+	APIURL                  = "https://www.alphavantage.co/query?function=%v&symbol=%v&apikey=%v"
 	WeeklyAdjustedFunction  = "TIME_SERIES_WEEKLY_ADJUSTED"
 	MonthlyAdjustedFunction = "TIME_SERIES_MONTHLY_ADJUSTED"
 )
@@ -25,6 +26,8 @@ var httpClient = &http.Client{
 }
 
 // structs
+
+// StockDataMonthly ...
 type StockDataMonthly struct {
 	MetaData struct {
 		Information   string `json:"1. Information"`
@@ -46,6 +49,7 @@ type StockDataMonthly struct {
 	Note         string `json:"Note"`
 }
 
+// StockDataWeekly ...
 type StockDataWeekly struct {
 	MetaData struct {
 		Information   string `json:"1. Information"`
@@ -67,6 +71,7 @@ type StockDataWeekly struct {
 	Note         string `json:"Note"`
 }
 
+// StockWeights ...
 type StockWeights struct {
 	OpenPriceWeight  string
 	HighPriceWeight  string
@@ -82,19 +87,19 @@ type AlphaVantageParam struct {
 	Symbol       string
 	Datatype     string // defaults to JSON, i don't think csv will ever come into play
 	APIKey       string
-	StartDate    time.Time // for internal use, not a parameter
-	EndDate      time.Time // for internal use, not a parameter
+	StartDate    time.Time
+	EndDate      time.Time
 	StockWeights StockWeights
 }
 
 func RetrieveStockDataWeekly(ctx context.Context, params AlphaVantageParam) (*StockDataWeekly, error) {
-	if params.Function != "TIME_SERIES_WEEKLY_ADJUSTED" || params.Symbol == "" || params.APIKey == "" { // TODO: make api key environment, add monthly function support
+	if params.Function != "TIME_SERIES_WEEKLY_ADJUSTED" || params.Symbol == "" || params.APIKey == "" {
 		return nil, fmt.Errorf("required params are missing or wrong")
 	}
 	if params.Datatype == "" {
 		params.Datatype = "json"
 	}
-	apiRequestURL := fmt.Sprintf(ApiURL, params.Function, params.Symbol, params.APIKey)
+	apiRequestURL := fmt.Sprintf(APIURL, params.Function, params.Symbol, params.APIKey)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiRequestURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
@@ -168,7 +173,7 @@ func MakeWeeklyDataSlice(ctx context.Context, symbols []string, timePer string) 
 		startDate = endDate.AddDate(0, -6, 0)
 	}
 
-	paramTemplate := AlphaVantageParam{Function: WeeklyAdjustedFunction, APIKey: ApiKey, StartDate: startDate, EndDate: endDate}
+	paramTemplate := AlphaVantageParam{Function: WeeklyAdjustedFunction, APIKey: os.Getenv(APIKeyEnvValue), StartDate: startDate, EndDate: endDate}
 	dataSlice := make([]*StockDataWeekly, len(symbols))
 	var allErrors []error
 	var err error
@@ -188,7 +193,7 @@ func MakeWeeklyDataSlice(ctx context.Context, symbols []string, timePer string) 
 }
 
 func AnalysisStoreWeeklyDataSlice(ctx context.Context, symbols []string) ([]*StockDataWeekly, error) {
-	paramTemplate := AlphaVantageParam{Function: WeeklyAdjustedFunction, APIKey: ApiKey}
+	paramTemplate := AlphaVantageParam{Function: WeeklyAdjustedFunction, APIKey: os.Getenv(APIKeyEnvValue)}
 	dataSlice := make([]*StockDataWeekly, len(symbols))
 	var allErrors []error
 	var err error

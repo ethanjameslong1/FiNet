@@ -68,7 +68,7 @@ func (s *DBService) GetAllPredictions(ctx context.Context) ([]Prediction, error)
 	return predictions, nil
 }
 
-func (s *DBService) GetAllPredictionsForUser(ctx context.Context, userID int) ([]Prediction, error) {
+func (s *DBService) RemoveAllPredictionsForUser(ctx context.Context, userID int) ([]Prediction, error) {
 	rows, err := s.db.QueryContext(ctx, SQL_SELECT_PREDICTIONS_FOR_USER, userID)
 	if err != nil {
 		return nil, fmt.Errorf("error querying for all predictions: %w", err)

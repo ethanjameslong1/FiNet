@@ -67,6 +67,7 @@ func main() {
 	mux.Handle("POST /rawdata", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RawDataHandler)))
 	mux.HandleFunc("GET /logout", appHandler.LogoutHandler)
 	mux.HandleFunc("POST /middleware", appHandler.Middleware)
+	mux.Handle("GET /clearpredictions", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.ClearPredictions)))
 
 	fmt.Printf("PROD: finet port running on app_network: finet:8000/\n")
 	if err := http.ListenAndServe(":8000", mux); err != nil {
