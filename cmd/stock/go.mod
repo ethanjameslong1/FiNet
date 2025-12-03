@@ -1,11 +1,9 @@
 module github.com/ethanjameslong1/FiNet/cmd/stock
 
-go 1.24.0
-
-toolchain go1.24.7
+go 1.25.4
 
 require (
-	github.com/ethanjameslong1/FiNet/database v0.0.0-20250930190400-a106d3ee87fa
+	github.com/ethanjameslong1/FiNet/database v0.0.0-20251203015345-dbb6219d9052
 	github.com/gin-gonic/gin v1.11.0
 	github.com/joho/godotenv v1.5.1
 	gonum.org/v1/gonum v0.16.0
