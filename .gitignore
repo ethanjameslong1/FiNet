@@ -1,0 +1,16 @@
+.DS_Store
+*.log
+*.swp
+
+docker/.env
+.env
+.env.local
+
+cmd/finet/finet
+cmd/finet/main
+*.exe
+*.test
+
+frontend/node_modules/
+frontend/build/
+frontend/dist/

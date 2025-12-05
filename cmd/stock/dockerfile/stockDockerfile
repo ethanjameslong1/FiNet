@@ -1,9 +1,10 @@
 FROM golang:1.25
 
-
-WORKDIR /usr/src/app
-
-COPY cmd/stock/go.mod cmd/stock/go.sum ./
+WORKDIR /app
+COPY database ./database
+RUN mkdir -p cmd/stock
+COPY cmd/stock/go.mod cmd/stock/go.sum ./cmd/stock
+WORKDIR /app/cmd/stock
 RUN go mod download
 
 COPY cmd/stock/ .

@@ -1,9 +1,11 @@
 FROM golang:1.25
 
 
-WORKDIR /usr/src/app
-
-COPY cmd/finet/go.mod cmd/finet/go.sum ./
+WORKDIR /app
+COPY database ./database
+RUN mkdir -p cmd/finet
+COPY cmd/finet/go.mod cmd/finet/go.sum ./cmd/finet
+WORKDIR /app/cmd/finet
 RUN go mod download
 
 COPY cmd/finet/ .

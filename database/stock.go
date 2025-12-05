@@ -13,7 +13,7 @@ const (
 	SQL_SELECT_ALL_PREDICTIONS      string = `SELECT id, predictable_symbol, predictor_symbol, correlation, prediction_model FROM prediction`
 	SQL_SELECT_PREDICTIONS_FOR_USER string = `SELECT id, predictable_symbol, predictor_symbol, correlation, prediction_model FROM prediction WHERE user_id = ?`
 	SQL_SELECT_PREDICTION_MODEL     string = `SELECT id FROM prediction_models WHERE model_name = ?`
-	SQL_REMOVE_PREDICTIONS_FOR_USER string = `REMOVE * FROM prediction WHERE user_id = ?`
+	SQL_REMOVE_PREDICTIONS_FOR_USER string = `DELETE FROM prediction WHERE user_id = ?`
 )
 
 type Prediction struct {
@@ -70,7 +70,7 @@ func (s *DBService) GetAllPredictions(ctx context.Context) ([]Prediction, error)
 }
 
 func (s *DBService) GetAllPredictionsForUser(ctx context.Context, userID int) ([]Prediction, error) {
-	rows, err := s.db.QueryContext(ctx, SQL_SELECT_PREDICTIONS_FOR_USER)
+	rows, err := s.db.QueryContext(ctx, SQL_SELECT_PREDICTIONS_FOR_USER, userID)
 	if err != nil {
 		return nil, fmt.Errorf("error querying for predictions for user: %w", err)
 	}
