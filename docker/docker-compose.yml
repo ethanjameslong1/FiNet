@@ -3,7 +3,7 @@ services:
     image: mysql:8.0
     environment:
       MYSQL_DATABASE: user_session_db
-      MYSQL_ROOT_PASSWORD: Front2Back!
+      MYSQL_ROOT_PASSWORD: ${SQL_ROOT_PASSWORD}
     volumes:
       - ./user_session_db/init.sql:/docker-entrypoint-initdb.d/init.sql
       - user_session_data:/var/lib/mysql
@@ -15,7 +15,7 @@ services:
     image: mysql:8.0
     environment:
       MYSQL_DATABASE: stock_prediction_db
-      MYSQL_ROOT_PASSWORD: Front2Back!
+      MYSQL_ROOT_PASSWORD: ${SQL_ROOT_PASSWORD}
     volumes:
       - ./stock_prediction_db/init.sql:/docker-entrypoint-initdb.d/init.sql
       - stock_prediction_data:/var/lib/mysql
@@ -27,6 +27,7 @@ services:
     build:
       context: ../frontend
       dockerfile: Dockerfile
+    image: ethanjameslong1/frontend:latest
     ports:
       - "8080:80"
     networks:
@@ -41,6 +42,7 @@ services:
     build:
       context: ..
       dockerfile: ./cmd/finet/dockerfile/finetDockerfile
+    image: ethanjameslong1/finet:latest
     expose:
       - "8000"
     environment:
@@ -63,6 +65,7 @@ services:
     build:
       context: ..
       dockerfile: ./cmd/stock/dockerfile/stockDockerfile
+    image: ethanjameslong1/analysis:latest
     expose:
       - "8001"
     environment:
