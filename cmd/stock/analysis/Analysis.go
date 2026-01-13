@@ -45,8 +45,9 @@ type Prediction struct {
 // Creates a hashmap of relationalData, returns the map and an error (if any)
 func StoreWeeklyDataV1(d []*StockDataWeekly, startDate string, lookBackTime int) (map[RelationshipKey][]RelationshipData, error) {
 	symbolDataMap := make(map[string]*StockDataWeekly)
+	fmt.Printf("\nDEBUG: Symbol:0 in StoreWeeklydataV1: %+v\nSymbol:1 : %+v", d[0].MetaData.Symbol, d[1].MetaData.Symbol)
 	for _, data := range d {
-		fmt.Printf("DEBUG: Symbol in symbolDataMap StoreWeeklyDataV1: %v", data.MetaData.Symbol)
+		fmt.Printf("\nDEBUG: Symbol in symbolDataMap StoreWeeklyDataV1: %v\n", data.MetaData.Symbol)
 
 		symbolDataMap[data.MetaData.Symbol] = data
 	}
@@ -66,7 +67,7 @@ func StoreWeeklyDataV1(d []*StockDataWeekly, startDate string, lookBackTime int)
 			mapMutex.Lock()
 			relationshipMap[pkg.Key] = append(relationshipMap[pkg.Key], pkg.Data)
 			mapMutex.Unlock()
-			fmt.Printf("Collector recieved relationship: %+v\n", pkg)
+			// fmt.Printf("Collector recieved relationship: %+v\n", pkg)
 		}
 		fmt.Println("Collector: Channel closed, no more relationships to process.")
 	}(ch)

@@ -72,6 +72,9 @@ func (h *StockHandler) AnalysisAPIRequest(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, apiInfo.SymbolList)
 		return
 	}
+	for i := range dataSlice {
+		fmt.Printf("\ndataSlice: %+v\n", dataSlice[i].MetaData.Symbol)
+	}
 
 	DataMap, err := analysis.StoreWeeklyDataV1(dataSlice, "", 1)
 	if err != nil {

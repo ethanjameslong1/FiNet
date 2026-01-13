@@ -99,25 +99,30 @@ func RetrieveStockDataWeekly(ctx context.Context, params AlphaVantageParam) (*St
 	if params.Datatype == "" {
 		params.Datatype = "json"
 	}
+	fmt.Printf("\nSymbol: %s\n", params.Symbol)
 	apiRequestURL := fmt.Sprintf(APIURL, params.Function, params.Symbol, params.APIKey)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiRequestURL, nil)
 	if err != nil {
+		fmt.Printf("ERROR SPOT 1")
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 	typeAccepting := fmt.Sprintf("application/%v", params.Datatype)
 	req.Header.Set("Accept", typeAccepting)
 	resp, err := httpClient.Do(req)
 	if err != nil {
+		fmt.Printf("ERROR SPOT 2")
 		return nil, fmt.Errorf("error sending request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("ERROR SPOT 3")
 		errorBody, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(errorBody))
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		fmt.Printf("ERROR SPOT 4")
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
 	var stockData StockDataWeekly
@@ -125,6 +130,10 @@ func RetrieveStockDataWeekly(ctx context.Context, params AlphaVantageParam) (*St
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshalling response: %w", err)
 	}
+	if len(stockData.MetaData.Symbol) == 0 {
+		fmt.Printf("No data returned, response: %+v", stockData)
+	}
+	fmt.Printf("\nStock Data: %s\n", stockData.MetaData.Symbol)
 	if params.StartDate.IsZero() && params.EndDate.IsZero() {
 		return &stockData, nil
 	}
@@ -200,7 +209,9 @@ func AnalysisStoreWeeklyDataSlice(ctx context.Context, symbols []string) ([]*Sto
 	fmt.Printf("AnalysisStoreWeeklyDataSlice: Symbols: %v", symbols)
 	for i, s := range symbols {
 		paramTemplate.Symbol = s
+		fmt.Printf("\nSTORE WEEKLY DATASLICE SYMBOL %d: %s\n", i, s)
 		dataSlice[i], err = RetrieveStockDataWeekly(ctx, paramTemplate)
+		fmt.Printf("\nretrieveStockDataWeekly data: %+v\n", dataSlice[i].MetaData.Symbol)
 		if err != nil {
 			log.Printf("Error retrieving stock data for symbol %q: %v", s, err)
 			allErrors = append(allErrors, fmt.Errorf("symbol %q: %w", s, err))
