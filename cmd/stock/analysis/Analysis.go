@@ -46,6 +46,8 @@ type Prediction struct {
 func StoreWeeklyDataV1(d []*StockDataWeekly, startDate string, lookBackTime int) (map[RelationshipKey][]RelationshipData, error) {
 	symbolDataMap := make(map[string]*StockDataWeekly)
 	for _, data := range d {
+		fmt.Printf("DEBUG: Symbol in symbolDataMap StoreWeeklyDataV1: %v", data.MetaData.Symbol)
+
 		symbolDataMap[data.MetaData.Symbol] = data
 	}
 	relationshipMap := make(map[RelationshipKey][]RelationshipData)

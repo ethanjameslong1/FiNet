@@ -64,7 +64,7 @@ func (h *StockHandler) AnalysisAPIRequest(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"JSON Request Binding Error": err.Error()})
 		return
 	}
-	fmt.Printf("ApiInfo: %v\n", apiInfo)
+	fmt.Printf("ApiInfo: %v\n", apiInfo.SymbolList)
 
 	dataSlice, err := analysis.AnalysisStoreWeeklyDataSlice(c, apiInfo.SymbolList)
 	if err != nil {

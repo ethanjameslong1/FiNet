@@ -197,7 +197,7 @@ func AnalysisStoreWeeklyDataSlice(ctx context.Context, symbols []string) ([]*Sto
 	dataSlice := make([]*StockDataWeekly, len(symbols))
 	var allErrors []error
 	var err error
-	log.Printf("AnalysisStoreWeeklyDataSlice: paramTemplate: %v", paramTemplate)
+	fmt.Printf("AnalysisStoreWeeklyDataSlice: Symbols: %v", symbols)
 	for i, s := range symbols {
 		paramTemplate.Symbol = s
 		dataSlice[i], err = RetrieveStockDataWeekly(ctx, paramTemplate)
@@ -210,5 +210,6 @@ func AnalysisStoreWeeklyDataSlice(ctx context.Context, symbols []string) ([]*Sto
 			continue
 		}
 	}
+	fmt.Printf("DEBUG: dataslice from StoreWeeklyDataSlice: %+v", dataSlice)
 	return dataSlice, nil
 }
