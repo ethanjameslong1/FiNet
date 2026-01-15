@@ -128,7 +128,6 @@ func (h *Handler) StockRequestHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-	return
 }
 
 func (h *Handler) ShowPredictionsHandler(w http.ResponseWriter, r *http.Request) {

@@ -17,12 +17,12 @@ const (
 	HandlerTimeout = 2 * 24 * time.Hour
 )
 
-type apiCall struct { // any changes made here need to be reflected in finet Go web server
+type apiCall struct { // NOTE:  any changes made here need to be reflected in finet Go web server
 	SymbolList []string `json:"symbolList"`
 	TimePeriod string   `json:"time"`
 	UserID     int      `json:"Id"`
 }
-type anlysisCall struct { // any changes made here need to be reflected in finet Go web server
+type anlysisCall struct { // NOTE:  any changes made here need to be reflected in finet Go web server
 	SymbolList []string `json:"symbolList"`
 	UserID     int      `json:"Id"`
 }
@@ -64,16 +64,12 @@ func (h *StockHandler) AnalysisAPIRequest(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"JSON Request Binding Error": err.Error()})
 		return
 	}
-	fmt.Printf("ApiInfo: %v\n", apiInfo.SymbolList)
 
 	dataSlice, err := analysis.AnalysisStoreWeeklyDataSlice(c, apiInfo.SymbolList)
 	if err != nil {
 		log.Printf("Error creating data slice for analysis: %v", err)
 		c.IndentedJSON(http.StatusBadRequest, apiInfo.SymbolList)
 		return
-	}
-	for i := range dataSlice {
-		fmt.Printf("\ndataSlice: %+v\n", dataSlice[i].MetaData.Symbol)
 	}
 
 	DataMap, err := analysis.StoreWeeklyDataV1(dataSlice, "", 1)
@@ -88,7 +84,6 @@ func (h *StockHandler) AnalysisAPIRequest(c *gin.Context) {
 	}
 
 	for _, prediction := range Pred {
-		log.Printf("AddPrediction begin called with %s (predictable), %s (predictor) and %f (correlation)", prediction.PredictableSym, prediction.PredictorSym, prediction.Correlation)
 		h.StockDBService.AddPrediction(c, prediction.PredictableSym, prediction.PredictorSym, prediction.Correlation, "First Draft", apiInfo.UserID)
 	}
 

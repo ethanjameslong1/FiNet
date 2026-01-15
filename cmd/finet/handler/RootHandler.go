@@ -6,12 +6,12 @@ import (
 	"text/template"
 )
 
-func (h *Handler) RootHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) RootHandler(w http.ResponseWriter, r *http.Request) { // TODO: I think this whole file can go
 	if r.URL.Path != "/finet/" && r.URL.Path != "/" {
 		http.Error(w, "404 not found", http.StatusNotFound)
 		return
 	}
-	// _, ok := r.Context().Value(userContextKey).(database.User)
+	// _, ok := r.Context().Value(userContextKey).(database.User) //TODO: If keeping file this feels like security vulnerability
 	// if ok {
 	// 	http.Redirect(w, r, "/finet/stock", http.StatusSeeOther)
 	// }
@@ -27,5 +27,4 @@ func (h *Handler) RootHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-
 }

@@ -17,7 +17,6 @@ func (h *Handler) Middleware(w http.ResponseWriter, r *http.Request) {
 	var p AuthRequest
 	err := json.NewDecoder(r.Body).Decode(&p)
 	if err != nil {
-		log.Print("DEBUG: middleware error decoding")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]string{
@@ -26,7 +25,6 @@ func (h *Handler) Middleware(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	log.Printf("DEBUG: authToken: %s", p.Token)
 	sessionID := p.Token
 	session, dbErr := h.UserSessionDBService.GetSessionByID(r.Context(), sessionID)
 	if dbErr != nil {
@@ -40,7 +38,7 @@ func (h *Handler) Middleware(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if time.Now().After(session.ExpiresAt) {
-		log.Printf("AuthMiddleware: Session ID '%s' has expired for user ID '%d'", sessionID, session.UserID)
+		log.Print("AuthMiddleware: Session ID has expired for user")
 		go func() {
 			deleteCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
@@ -105,7 +103,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		if time.Now().After(session.ExpiresAt) {
-			log.Printf("AuthMiddleware: Session ID '%s' has expired for user ID '%d'", sessionID, session.UserID)
+			log.Print("AuthMiddleware: Session ID has expired for user")
 			go func() {
 				deleteCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 				defer cancel()
@@ -130,7 +128,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 
 		user, userErr := h.UserSessionDBService.GetUserByID(r.Context(), session.UserID)
 		if userErr != nil {
-			log.Printf("AuthMiddleware: Failed to get user details for user ID '%d': %v", session.UserID, userErr)
+			log.Printf("AuthMiddleware: Failed to get user details for user, err: %v", userErr)
 			http.SetCookie(w, &http.Cookie{Name: "SessionCookie", Value: "", Path: "/finet/", Expires: time.Unix(0, 0), HttpOnly: true, Secure: true, SameSite: http.SameSiteLaxMode})
 			http.Error(w, "Authentication error", http.StatusInternalServerError)
 			http.Redirect(w, r, "/", http.StatusUnauthorized)

@@ -29,7 +29,7 @@ func main() {
 	defer servStockDB.Close()
 
 	go func() {
-		ticker := time.NewTicker(1 * time.Hour) // Clean up every hour
+		ticker := time.NewTicker(1 * time.Hour) // Clean up sessions every hour
 		defer ticker.Stop()
 		for {
 			select {
@@ -52,7 +52,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	appHandler.UserSessionDBService.AddUser(ctx, "ethan", "test")
 
 	mux := http.NewServeMux()
 	mux.Handle("/", appHandler.AuthMiddleware(http.HandlerFunc(appHandler.RootHandler)))

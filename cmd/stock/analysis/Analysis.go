@@ -13,12 +13,12 @@ import (
 
 // Test Values
 var (
-	AlphaVantageSymbols     = []string{"MSFT", "GOOG", "TSLA", "AMZN"}
+	AlphaVantageSymbols     = []string{"MSFT", "GOOG", "TSLA", "AMZN"} // TODO: probably no longer needed
 	ErrLookbackLimitReached = errors.New("lookback limit reached")
 )
 
 const (
-	lookBackTimeYear = 10
+	lookBackTimeYear = 10 // TODO: probably no longer needed
 	dateFormat       = "2006-01-02"
 )
 
@@ -45,10 +45,7 @@ type Prediction struct {
 // Creates a hashmap of relationalData, returns the map and an error (if any)
 func StoreWeeklyDataV1(d []*StockDataWeekly, startDate string, lookBackTime int) (map[RelationshipKey][]RelationshipData, error) {
 	symbolDataMap := make(map[string]*StockDataWeekly)
-	fmt.Printf("\nDEBUG: Symbol:0 in StoreWeeklydataV1: %+v\nSymbol:1 : %+v", d[0].MetaData.Symbol, d[1].MetaData.Symbol)
 	for _, data := range d {
-		fmt.Printf("\nDEBUG: Symbol in symbolDataMap StoreWeeklyDataV1: %v\n", data.MetaData.Symbol)
-
 		symbolDataMap[data.MetaData.Symbol] = data
 	}
 	relationshipMap := make(map[RelationshipKey][]RelationshipData)
@@ -92,16 +89,14 @@ func StoreWeeklyDataV1(d []*StockDataWeekly, startDate string, lookBackTime int)
 		if sym == "" {
 			continue
 		}
-		wg.Add(1) // for every symbol spawn a seperate thread to analysis it for predictors
+		wg.Add(1)
 		go func(ch chan<- RelationshipPackage, sym string, stockMap map[string]*StockDataWeekly, originalDate2 string, yearsBack int) {
 			defer wg.Done()
 
-			// Helper variables to be accessed during the main loop*****************************
 			tooFarFlag := false
 			currentDate := originalDate2 // establish currentDate as the original date to go back from
-			// Helper variables to be accessed during the main loop*****************************
 
-			for !tooFarFlag { // for every week that it can this loop will reference every other symbol and try and relate it to the main predictable symbol (sym), will be multithread as well
+			for !tooFarFlag {
 				laterDate := currentDate
 				olderDate, err := findPreviousWeekString(originalDate2, currentDate, yearsBack)
 				if err != nil {
@@ -262,7 +257,6 @@ func findPriorFriday(startDate string) (string, error) {
 }
 
 func AnalyzeStoredDataV1(data map[RelationshipKey][]RelationshipData) ([]Prediction, error) {
-	fmt.Println("--- Correlation Analysis ---")
 	var pSym1, pSym2 string
 	var c float64
 	var PredictionSlice []Prediction
@@ -282,12 +276,9 @@ func AnalyzeStoredDataV1(data map[RelationshipKey][]RelationshipData) ([]Predict
 
 		correlation := stat.Correlation(predictorDeltas, predictableDeltas, nil)
 
-		// Print the result for the current pair.
-		fmt.Printf("Correlation between %s (predictor) and %s (predictable): %.4f\n", key.PredictorSym, key.PredictableSym, correlation)
 		pSym1, pSym2, c = key.PredictableSym, key.PredictorSym, correlation
 		PredictionSlice = append(PredictionSlice, Prediction{PredictableSym: pSym1, PredictorSym: pSym2, Correlation: c})
 
 	}
-	fmt.Println("--------------------------")
 	return PredictionSlice, nil
 }
