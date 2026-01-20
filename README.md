@@ -1,6 +1,6 @@
-GoFiNet Stock Analysis Web App
+FiNet Stock Analysis Web App
 
-GoFiNet is a web application built with Go that allows users to analyze financial stocks. Users can register and log in to a secure session to submit analysis requests based on specific stocks. The application then processes this information to provide financial insights (Correlation Data). The backend is designed for concurrency and scalability.
+FiNet is a web application built with Go that allows users to analyze financial stocks. Users can register and log in to a secure session to submit analysis requests based on specific stocks. The application then processes this information to provide financial insights (Correlation Data). The backend is designed for concurrency and scalability.
 Key Features 🔑
 
     User Authentication & Session Management: Secure user registration and login functionality to protect user data and analysis history. Persistent user sessions are managed with a 24-hour lifetime. An automated cleanup service runs hourly in the background to remove expired sessions, ensuring database efficiency. All powered by MySQL Databases.
